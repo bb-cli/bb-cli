@@ -1,0 +1,32 @@
+{
+    "name": "semiherdogan/bitbucketcli",
+    "description": "Bitbucket Rest Api Cli tool.",
+    "keywords": ["bitbucket"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Semih ERDOĞAN",
+            "email": "hasansemiherdogan@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-json": "*",
+        "php": "^7.1|^8.0"
+    },
+    "bin": [
+        "bin/bb"
+    ],
+    "autoload": {
+      "files": [
+        "src/utils/helpers.php"
+      ],
+        "psr-4": {
+            "SemihErdogan\\BitbucketRestCli\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

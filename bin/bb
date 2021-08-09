@@ -1,0 +1,72 @@
+#!/usr/bin/env php
+<?php
+
+if (file_exists(__DIR__.'/../../../autoload.php')) {
+    require __DIR__.'/../../../autoload.php';
+} else {
+    require __DIR__.'/../vendor/autoload.php';
+}
+
+$actions = [
+    'pr' => \SemihErdogan\BitbucketRestCli\Pr::class,
+    'pipeline' => \SemihErdogan\BitbucketRestCli\Pipeline::class,
+    'branch' => \SemihErdogan\BitbucketRestCli\Branch::class,
+    'auth' => \SemihErdogan\BitbucketRestCli\Auth::class,
+];
+
+$helpCommands = [
+    'help',
+    '--help',
+    '-h',
+];
+
+$userBaseAction = $argv[1] ?? null;
+
+if (is_null($userBaseAction)) {
+    e('Command required', 'red');
+    exit(1);
+}
+
+if (in_array($userBaseAction, $helpCommands)) {
+    e('Available actions:', 'green');
+    e(array_keys($actions), 'green');
+    exit(0);
+}
+
+if (!isset($actions[$userBaseAction])) {
+    e("Given action is invalid: ({$userBaseAction})", 'red');
+    exit(1);
+}
+
+$actionClass = new $actions[$userBaseAction]();
+$userAction = $argv[2] ?? null;
+
+if (in_array($userAction, $helpCommands)) {
+    e('Available methods:', 'green');
+    e(array_values($actionClass::AVAILABLE_COMMANDS));
+    exit(0);
+}
+
+$classMethodToCall = $actionClass::DEFAULT_METHOD;
+
+if (!is_null($userAction)) {
+    $classMethodToCall = $actionClass->getMethodNameFromAlias($userAction);
+}
+
+if ($classMethodToCall === false) {
+    e("Method not exists. ({$argv[2]})", 'red');
+    exit(1);
+}
+
+try {
+    call_user_func_array(
+        [$actionClass, $classMethodToCall],
+        array_slice($argv, 3)
+    );
+} catch (\ArgumentCountError $e) {
+    e('Too few arguments.', 'red');
+    exit(1);
+} catch (\Throwable $th) {
+    e($th->getMessage(), 'red');
+    exit(1);
+}
