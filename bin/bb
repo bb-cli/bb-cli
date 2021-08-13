@@ -8,10 +8,10 @@ if (file_exists(__DIR__.'/../../../autoload.php')) {
 }
 
 $actions = [
-    'pr' => \SemihErdogan\BitbucketRestCli\Pr::class,
-    'pipeline' => \SemihErdogan\BitbucketRestCli\Pipeline::class,
-    'branch' => \SemihErdogan\BitbucketRestCli\Branch::class,
-    'auth' => \SemihErdogan\BitbucketRestCli\Auth::class,
+    'pr' => \BBCli\BBCli\Pr::class,
+    'pipeline' => \BBCli\BBCli\Pipeline::class,
+    'branch' => \BBCli\BBCli\Branch::class,
+    'auth' => \BBCli\BBCli\Auth::class,
 ];
 
 $helpCommands = [
@@ -22,12 +22,7 @@ $helpCommands = [
 
 $userBaseAction = $argv[1] ?? null;
 
-if (is_null($userBaseAction)) {
-    e('Command required', 'red');
-    exit(1);
-}
-
-if (in_array($userBaseAction, $helpCommands)) {
+if (is_null($userBaseAction) || in_array($userBaseAction, $helpCommands)) {
     e('Available actions:', 'green');
     e(array_keys($actions), 'green');
     exit(0);

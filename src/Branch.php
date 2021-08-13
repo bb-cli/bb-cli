@@ -1,6 +1,6 @@
 <?php
 
-namespace SemihErdogan\BitbucketRestCli;
+namespace BBCli\BBCli;
 
 class Branch extends Base
 {

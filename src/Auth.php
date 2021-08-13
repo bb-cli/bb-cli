@@ -1,6 +1,6 @@
 <?php
 
-namespace SemihErdogan\BitbucketRestCli;
+namespace BBCli\BBCli;
 
 class Auth extends Base
 {
@@ -9,6 +9,7 @@ class Auth extends Base
 
     public const AVAILABLE_COMMANDS = [
         'saveLoginInfo' => 'save',
+        'show' => 'show',
     ];
 
     public function saveLoginInfo()
@@ -25,6 +26,19 @@ class Auth extends Base
         } else {
             e('Cannot save file to: '.$this->configFilePath, 'red');
         }
+    }
+
+    public function show()
+    {
+        $configFileContent = file_get_contents($this->configFilePath);
+        $config = json_decode($configFileContent, true);
+
+        if (empty($config)) {
+            e('Auth info not found. Run "bb auth" to save your credentials.', 'red');
+            return;
+        }
+
+        e($config['auth']);
     }
 
     private function saveToFile($username, $appPassword)

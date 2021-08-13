@@ -21,7 +21,7 @@
         "src/utils/helpers.php"
       ],
         "psr-4": {
-            "SemihErdogan\\BitbucketRestCli\\": "src/"
+            "BBCli\\BBCli\\": "src/"
         }
     },
     "config": {
