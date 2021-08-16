@@ -3,8 +3,15 @@
 
 if (file_exists(__DIR__.'/../../../autoload.php')) {
     require __DIR__.'/../../../autoload.php';
-} else {
+} elseif (file_exists(__DIR__.'/../vendor/autoload.php')) {
     require __DIR__.'/../vendor/autoload.php';
+} else {
+    include __DIR__.'/../src/utils/helpers.php';
+    include __DIR__.'/../src/Base.php';
+    include __DIR__.'/../src/Auth.php';
+    include __DIR__.'/../src/Pr.php';
+    include __DIR__.'/../src/Pipeline.php';
+    include __DIR__.'/../src/Branch.php';
 }
 
 $actions = [
@@ -65,3 +72,5 @@ try {
     e($th->getMessage(), 'red');
     exit(1);
 }
+
+
