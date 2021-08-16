@@ -24,6 +24,8 @@ class Base
 
     public function makeRequest($method = 'GET', $url = '', $payload = [])
     {
+        $this->checkAuthInfo();
+
         $repoPath = getRepoPath();
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://api.bitbucket.org/2.0/repositories/{$repoPath}{$url}");
@@ -91,6 +93,16 @@ class Base
         if (!file_exists($this->configFilePath)) {
             file_put_contents($this->configFilePath, '{}');
             chmod($this->configFilePath, 0600);
+        }
+    }
+
+    private function checkAuthInfo()
+    {
+        // TODO: check if given auth info is valid
+        if (!config('auth')) {
+            e('You have to configure auth info to use this command.', 'red');
+            e('Run "bb auth" first.', 'yellow');
+            exit(1);
         }
     }
 }
