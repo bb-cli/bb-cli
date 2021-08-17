@@ -21,35 +21,30 @@ class Auth extends Base
         $username = getUserInput('Username: ');
         $appPassword = getUserInput('App password: ');
 
-        if ($this->saveToFile($username, $appPassword) !== false) {
+        $saveToFile = userConfig([
+            'auth' => [
+                'username' => $username,
+                'appPassword' => $appPassword,
+            ],
+        ]);
+
+        if ($saveToFile !== false) {
             e('Auth info saved.', 'green');
         } else {
-            e('Cannot save file to: '.$this->configFilePath, 'red');
+            e('Cannot save file to: '.config('userConfigFilePath'), 'red');
         }
     }
 
     public function show()
     {
-        $configFileContent = file_get_contents($this->configFilePath);
-        $config = json_decode($configFileContent, true);
+        $authInfo = userConfig('auth');
 
-        if (empty($config)) {
-            e('Auth info not found. Run "bb auth" to save your credentials.', 'red');
-            return;
+        if (!$authInfo) {
+            e('You have to configure auth info to use this command.', 'red');
+            e('Run "bb auth" first.', 'yellow');
+            exit(1);
         }
 
-        e($config['auth']);
-    }
-
-    private function saveToFile($username, $appPassword)
-    {
-        $json = json_encode([
-            'auth' => [
-                'username' => $username,
-                'appPassword' => $appPassword,
-            ],
-        ], JSON_PRETTY_PRINT);
-
-        return file_put_contents($this->configFilePath, $json);
+        e($authInfo);
     }
 }

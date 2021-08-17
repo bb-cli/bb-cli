@@ -4,15 +4,12 @@ namespace BBCli\BBCli;
 
 class Base
 {
-    public $configFilePath;
     public const DEFAULT_METHOD = 'DEFAULT_METHOD_NOT_DEFINED';
     public const AVAILABLE_COMMANDS = [];
     public const CHECK_GIT_FOLDER = true;
 
     public function __construct()
     {
-        $this->createConfigFileIfNotExists();
-
         $currentClass = get_class($this);
         if ($currentClass::CHECK_GIT_FOLDER) {
             if (!is_dir(getcwd().'/.git')) {
@@ -24,7 +21,7 @@ class Base
 
     public function makeRequest($method = 'GET', $url = '', $payload = [])
     {
-        $this->checkAuthInfo();
+        $this->checkAuth();
 
         $repoPath = getRepoPath();
         $ch = curl_init();
@@ -33,7 +30,7 @@ class Base
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Basic '.base64_encode(config('auth.username').':'.config('auth.appPassword')),
+            'Authorization: Basic '.base64_encode(userConfig('auth.username').':'.userConfig('auth.appPassword')),
         ]);
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
@@ -82,24 +79,10 @@ class Base
         return false;
     }
 
-    private function createConfigFileIfNotExists()
-    {
-        $this->configFilePath = getenv('HOME').'/.bitbucket-rest-cli-config.json';
-
-        if (!file_exists(dirname($this->configFilePath))) {
-            mkdir(dirname($this->configFilePath), 0600, true);
-        }
-
-        if (!file_exists($this->configFilePath)) {
-            file_put_contents($this->configFilePath, '{}');
-            chmod($this->configFilePath, 0600);
-        }
-    }
-
-    private function checkAuthInfo()
+    private function checkAuth()
     {
         // TODO: check if given auth info is valid
-        if (!config('auth')) {
+        if (!userConfig('auth')) {
             e('You have to configure auth info to use this command.', 'red');
             e('Run "bb auth" first.', 'yellow');
             exit(1);
