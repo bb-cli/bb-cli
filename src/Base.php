@@ -46,6 +46,10 @@ class Base
             die;
         }
 
+        if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 401) {
+            throw new \Exception('Authorization error, please check your credentials.', 1);
+        }
+
         curl_close($ch);
 
         $jsonResult = json_decode($result, true);
