@@ -97,9 +97,10 @@ if (!function_exists('userConfig')) {
             $arrayKey = key($key);
             $config[$arrayKey] = $key[$arrayKey];
 
-            $json = json_encode($config, JSON_PRETTY_PRINT);
-
-            return file_put_contents($userConfigFilePath, $json);
+            return file_put_contents(
+                $userConfigFilePath,
+                json_encode($config, JSON_PRETTY_PRINT)
+            );
         }
 
         return array_get($config, $key, $default);
