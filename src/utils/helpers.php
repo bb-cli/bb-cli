@@ -77,13 +77,31 @@ if (!function_exists('getUserInput')) {
 
 if (!function_exists('config')) {
     function config($key, $default = null) {
-        $configFile = getenv('HOME').'/.bitbucket-rest-cli-config.json';
+        $appConfig = include __DIR__.'/../../config/app.php';
 
-        if (!file_exists($configFile)) {
-            return $default;
+        return array_get($appConfig, $key, $default);
+    }
+}
+
+if (!function_exists('userConfig')) {
+    function userConfig($key, $default = null) {
+        $userConfigFilePath = config('userConfigFilePath');
+        $config = json_decode(file_get_contents($userConfigFilePath), true);
+
+        if (is_null($key)) {
+            return $config;
         }
 
-        $config = json_decode(file_get_contents($configFile), true);
+        // update file if "$key" parameter is array
+        if (is_array($key)) {
+            $arrayKey = key($key);
+            $config[$arrayKey] = $key[$arrayKey];
+
+            return file_put_contents(
+                $userConfigFilePath,
+                json_encode($config, JSON_PRETTY_PRINT)
+            );
+        }
 
         return array_get($config, $key, $default);
     }
