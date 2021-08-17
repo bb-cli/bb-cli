@@ -1,24 +1,18 @@
 #!/usr/bin/env php
 <?php
 
-if (file_exists(__DIR__.'/../../../autoload.php')) {
-    require __DIR__.'/../../../autoload.php';
-} elseif (file_exists(__DIR__.'/../vendor/autoload.php')) {
-    require __DIR__.'/../vendor/autoload.php';
-} else {
-    include __DIR__.'/../src/utils/helpers.php';
-    include __DIR__.'/../src/Base.php';
-    include __DIR__.'/../src/Auth.php';
-    include __DIR__.'/../src/Pr.php';
-    include __DIR__.'/../src/Pipeline.php';
-    include __DIR__.'/../src/Branch.php';
+require_once __DIR__.'/../src/utils/helpers.php';
+require_once __DIR__.'/../src/Base.php';
+
+foreach (glob(__DIR__.'/../src/Actions/*.php') as $file) {
+    require_once $file;
 }
 
 $actions = [
-    'pr' => \BBCli\BBCli\Pr::class,
-    'pipeline' => \BBCli\BBCli\Pipeline::class,
-    'branch' => \BBCli\BBCli\Branch::class,
-    'auth' => \BBCli\BBCli\Auth::class,
+    'pr' => \BBCli\BBCli\Actions\Pr::class,
+    'pipeline' => \BBCli\BBCli\Actions\Pipeline::class,
+    'branch' => \BBCli\BBCli\Actions\Branch::class,
+    'auth' => \BBCli\BBCli\Actions\Auth::class,
 ];
 
 $helpCommands = [
@@ -72,5 +66,3 @@ try {
     e($th->getMessage(), 'red');
     exit(1);
 }
-
-

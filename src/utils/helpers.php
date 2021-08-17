@@ -27,7 +27,8 @@ if (!function_exists('getRepoPath')) {
     function getRepoPath()
     {
         $remoteOrigin = trim(exec('git config --get remote.origin.url'));
-        preg_match('/.*:(.+?)\.git/', $remoteOrigin, $matches);
+        preg_match('/.*bitbucket\.org[:,\/](.+?)\.git/', $remoteOrigin, $matches);
+
         return $matches[1];
     }
 }

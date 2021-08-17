@@ -1,6 +1,8 @@
 <?php
 
-namespace BBCli\BBCli;
+namespace BBCli\BBCli\Actions;
+
+use BBCli\BBCli\Base;
 
 class Auth extends Base
 {
