@@ -8,7 +8,7 @@ With this app you can see pull request, pipelines, branchs etc. from your termin
 # Installation
 __NOTE__: before install this package, you should have php installed on your machine.
 
-* Download `bb.phar` file from releases page.
+* Download standalone binary from [releases](https://github.com/bb-cli/bb-cli/releases)
 * Move downloaded file to path like `mv bb.phar /usr/local/bin/bb`
 
 # Help Command
