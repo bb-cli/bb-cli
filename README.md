@@ -67,3 +67,9 @@ You can see auth info with using show command. `bb auth show`
 
 ## List
 `bb branch list` lists branchs .
+
+## Name
+`bb branch name feature` list branches that branch name contains "feature".
+
+## User
+`bb branch user semih` list branches that latest commit user name contains "semih".
