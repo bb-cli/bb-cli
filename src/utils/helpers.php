@@ -53,7 +53,7 @@ if (!function_exists('e')) {
                 if (is_array($value)) {
                     e($value, $color, $prefix, $end);
                 } else {
-                    if (!is_numeric($key)) {
+                    if (!is_int($key)) {
                         e(ucfirst($key).': ', 'cyan', $prefix, $colors['nocolor']);
                     }
 
