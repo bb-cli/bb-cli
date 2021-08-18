@@ -88,7 +88,7 @@ class Pr extends Base
 
     public function merge($prNumber)
     {
-        e($this->makeRequest('POST', "/pullrequests/{$prNumber}/merge")['state']);
+        e($this->makeRequest('POST', "/pullrequests/{$prNumber}/merge")['state'], 'green');
     }
 
     public function create($fromBranch, $toBranch = '')

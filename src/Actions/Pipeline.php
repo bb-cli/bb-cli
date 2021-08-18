@@ -23,7 +23,7 @@ class Pipeline extends Base
                 'id' => $pipeLineNumber,
                 'creator' => array_get($response, 'creator.display_name'),
                 'repository' => array_get($response, 'repository.name'),
-                'target' => array_get($response, 'target.destination'),
+                'target' => array_get($response, 'target.ref_name'),
                 'state' => array_get($response, 'state.name'),
                 'stateResult' => array_get($response, 'state.result.name'),
                 'created' => array_get($response, 'created_on'),
