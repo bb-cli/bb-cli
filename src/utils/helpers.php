@@ -2,7 +2,8 @@
 
 if (!function_exists('array_get')) {
     // get data from array using dot notation
-    function array_get($array, $key, $default = null) {
+    function array_get($array, $key, $default = null)
+    {
         if (is_null($key)) {
             return $array;
         }
@@ -52,7 +53,10 @@ if (!function_exists('e')) {
                 if (is_array($value)) {
                     e($value, $color, $prefix, $end);
                 } else {
-                    e(ucfirst($key).': ', 'cyan', $prefix, $colors['nocolor']);
+                    if (!is_numeric($key)) {
+                        e(ucfirst($key).': ', 'cyan', $prefix, $colors['nocolor']);
+                    }
+
                     e($value, 'yellow', '');
                 }
             }
@@ -65,7 +69,8 @@ if (!function_exists('e')) {
 }
 
 if (!function_exists('getUserInput')) {
-    function getUserInput($question, $default = null) {
+    function getUserInput($question, $default = null)
+    {
         if (is_null($default)) {
             $default = '';
         }
@@ -81,7 +86,8 @@ if (!function_exists('getUserInput')) {
 }
 
 if (!function_exists('config')) {
-    function config($key, $default = null) {
+    function config($key, $default = null)
+    {
         $appConfig = include __DIR__.'/../../config/app.php';
 
         return array_get($appConfig, $key, $default);
@@ -89,7 +95,8 @@ if (!function_exists('config')) {
 }
 
 if (!function_exists('userConfig')) {
-    function userConfig($key, $default = null) {
+    function userConfig($key, $default = null)
+    {
         $userConfigFilePath = config('userConfigFilePath');
         $config = json_decode(file_get_contents($userConfigFilePath), true);
 
