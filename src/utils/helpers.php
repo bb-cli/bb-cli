@@ -47,14 +47,18 @@ if (!function_exists('e')) {
             'white' => "\033[0;37m",
         ];
 
-        echo $colors[$color].$prefix;
-
-        echo is_array($data) ?
-            json_encode(
-                $data,
-                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
-            ) :
-            $data;
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                if (is_array($value)) {
+                    e($value, $color, $prefix, $end);
+                } else {
+                    e(ucfirst($key).': ', 'cyan', $prefix, $colors['nocolor']);
+                    e($value, 'yellow', '');
+                }
+            }
+        } else {
+            echo $colors[$color].$prefix.$data;
+        }
 
         echo $end;
     }
