@@ -18,7 +18,7 @@ class Branch extends Base
 
         foreach ($this->makeRequest('GET', "/refs/branches?page=1")['values'] as $branchInfo) {
             $result[] = [
-                'name' => $branchInfo['name'],
+                'branch' => $branchInfo['name'],
                 'user' => array_get($branchInfo, 'target.author.user.display_name') ?:
                     array_get($branchInfo, 'target.author.raw'),
             ];
