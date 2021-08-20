@@ -65,7 +65,13 @@ You can see auth info with using show command. `bb auth show`
 # Pipeline Command
 
 ## Latest
-`bb pipeline latest` gets latest pipeline info(status, state, etc.).
+`bb pipeline latest` gets latest pipeline info (status, state, etc.).
+
+## Get
+`bb pipeline get <pipeline-id>` gets pipeline info for given id (status, state, etc.).
+
+## Wait
+`bb pipeline wait <pipeline-id>` waits given pipeline to finish (checks every two seconds).
 
 
 ---

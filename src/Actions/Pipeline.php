@@ -6,16 +6,21 @@ use BBCli\BBCli\Base;
 
 class Pipeline extends Base
 {
-    public const DEFAULT_METHOD = 'get';
+    public const DEFAULT_METHOD = 'latest';
 
     public const AVAILABLE_COMMANDS = [
         'get' => 'get',
         'latest' => 'latest',
+        'wait' => 'wait',
     ];
 
-    public function get($pipeLineNumber)
+    public function get($pipeLineNumber, $return = false)
     {
         $response = $this->makeRequest('GET', "/pipelines/{$pipeLineNumber}");
+
+        if ($return) {
+            return $response;
+        }
 
         $repoPath = getRepoPath();
         e(
@@ -32,6 +37,24 @@ class Pipeline extends Base
             ],
             'yellow'
         );
+    }
+
+    public function wait($pipeLineNumber)
+    {
+        $response = $this->get($pipeLineNumber, true);
+
+        $state = array_get($response, 'state.name');
+
+        if ($state === 'COMPLETED') {
+            e(''); // empty line
+            $this->get($pipeLineNumber, false);
+            return;
+        }
+
+        e('.', 'yellow', '', '');
+        sleep(2);
+
+        $this->wait($pipeLineNumber);
     }
 
     public function latest()
