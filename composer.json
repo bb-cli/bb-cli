@@ -24,6 +24,9 @@
             "BBCli\\BBCli\\": "src/"
         }
     },
+    "scripts": {
+        "build": "php --define phar.readonly=0 create-phar.php && chmod +x bb.phar"
+    },
     "config": {
         "sort-packages": true
     },
