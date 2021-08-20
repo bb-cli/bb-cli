@@ -4,8 +4,11 @@
 require_once __DIR__.'/../src/utils/helpers.php';
 require_once __DIR__.'/../src/Base.php';
 
-foreach (glob(__DIR__.'/../src/Actions/*.php') as $file) {
-    require_once $file;
+$actionsFolder = __DIR__.'/../src/Actions';
+foreach (scandir($actionsFolder) as $file) {
+    if (substr($file, -4) === '.php') {
+        require_once "{$actionsFolder}/{$file}";
+    }
 }
 
 $actions = [
