@@ -11,6 +11,8 @@
     ],
     "require": {
         "ext-json": "*",
+        "ext-curl": "*",
+        "ext-readline": "*",
         "php": "^7.1|^8.0"
     },
     "bin": [

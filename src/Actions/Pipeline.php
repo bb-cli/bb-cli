@@ -46,7 +46,7 @@ class Pipeline extends Base
         $state = array_get($response, 'state.name');
 
         if ($state === 'COMPLETED') {
-            e(''); // empty line
+            e('');
             $this->get($pipeLineNumber, false);
             return;
         }
