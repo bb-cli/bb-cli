@@ -12,15 +12,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Build
       uses: shivammathur/setup-php@v2
       with:
         php-version: '7.1'
         run: php --define phar.readonly=0 create-phar.php
 
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
+    - uses: actions/upload-artifact@v2
+      with:
+        name: bb.phar
+        path: bb.phar
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: bb.phar
+
+    - uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: bb.phar
