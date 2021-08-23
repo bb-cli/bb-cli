@@ -7,18 +7,18 @@ on:
 
 jobs:
   build:
-    name: Publish binaries
+    name: Build phar file
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Build
+    - name: Create
       uses: shivammathur/setup-php@v2
       with:
         php-version: '7.1'
         run: php --define phar.readonly=0 create-phar.php
-
+      
     - uses: actions/upload-artifact@v2
       with:
         name: bb.phar
@@ -27,7 +27,9 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: bb.phar
+        path: bb.phar
 
+    - name: Upload
     - uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
