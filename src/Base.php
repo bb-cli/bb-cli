@@ -46,8 +46,14 @@ class Base
             die;
         }
 
-        if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 401) {
-            throw new \Exception('Authorization error, please check your credentials.', 1);
+        $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($httpStatusCode < 200 || $httpStatusCode > 299) {
+            if ($httpStatusCode === 401) {
+                throw new \Exception('Authorization error, please check your credentials.', 1);
+            }
+
+            throw new \Exception('An error occurred, status code: '.$httpStatusCode, 1);
         }
 
         curl_close($ch);
@@ -85,7 +91,6 @@ class Base
 
     private function checkAuth()
     {
-        // TODO: check if given auth info is valid
         if (!userConfig('auth')) {
             e('You have to configure auth info to use this command.', 'red');
             e('Run "bb auth" first.', 'yellow');
