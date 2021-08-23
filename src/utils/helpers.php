@@ -50,6 +50,7 @@ if (!function_exists('e')) {
             'magenta' => "\033[0;35m",
             'cyan' => "\033[0;36m",
             'white' => "\033[0;37m",
+            'gray' => "\033[0;90m",
         ];
 
         if (is_array($data)) {
