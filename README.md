@@ -3,6 +3,7 @@
 Use bitbucket from command line.
 With this app you can see pull request, pipelines, branchs etc. from your terminal.
 
+![ss](ss.gif)
 
 
 # Installation
