@@ -62,7 +62,8 @@ class Pr extends Base
 
     public function approve($prNumber)
     {
-        e($this->makeRequest('POST', "/pullrequests/{$prNumber}/approve"));
+        $this->makeRequest('POST', "/pullrequests/{$prNumber}/approve");
+        e('Approved.', 'green');
     }
 
     public function unApprove($prNumber)
