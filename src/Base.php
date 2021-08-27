@@ -53,7 +53,10 @@ class Base
                 throw new \Exception('Authorization error, please check your credentials.', 1);
             }
 
-            throw new \Exception('An error occurred, status code: '.$httpStatusCode, 1);
+            $allowedStatuses = [409];
+            if (!in_array($httpStatusCode, $allowedStatuses)) {
+                throw new \Exception('An error occurred, status code: '.$httpStatusCode, 1);
+            }
         }
 
         curl_close($ch);
