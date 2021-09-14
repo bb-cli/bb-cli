@@ -48,6 +48,7 @@ class Branch extends Base
             $result[] = [
                 'branch' => $branchName,
                 'user' => $branchOwner,
+                'updated' => date_create(array_get($branchInfo, 'target.date'))->format('Y-m-d H:i'),
             ];
         }
 
