@@ -1,6 +1,6 @@
 # Bitbucket Rest API CLI
 
-Use Bitbucket from command line. With this app you can see pull request, pipelines, branchs etc. from your terminal.
+Use Bitbucket from command line. With this app you can see pull request, pipelines, branches etc. from your terminal.
 
 ![Bitbucket CLI](ss.gif)
 
