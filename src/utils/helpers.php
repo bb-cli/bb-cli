@@ -28,7 +28,7 @@ if (!function_exists('getRepoPath')) {
     function getRepoPath()
     {
         $remoteOrigin = trim(exec('git config --get remote.origin.url'));
-        preg_match('/.*bitbucket\.org[:,\/](.+?)\.git/', $remoteOrigin, $matches);
+        preg_match('#.*bitbucket\.org[:,/](.+?)\.git#', $remoteOrigin, $matches);
 
         if (!$matches) {
             throw new \Exception('Cannot get repository info. Are you sure this is a bitbucket repository?');
