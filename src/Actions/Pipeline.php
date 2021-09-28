@@ -39,8 +39,12 @@ class Pipeline extends Base
         );
     }
 
-    public function wait($pipeLineNumber)
+    public function wait($pipeLineNumber = null)
     {
+        if (is_null($pipeLineNumber)) {
+            $pipeLineNumber = $this->getLatestPipelineId();
+        }
+
         $response = $this->get($pipeLineNumber, true);
 
         $state = array_get($response, 'state.name');
@@ -59,8 +63,11 @@ class Pipeline extends Base
 
     public function latest()
     {
-        $response = $this->makeRequest('GET', '/pipelines/');
+        return $this->get($this->getLatestPipelineId());
+    }
 
-        return $this->get($response['size']);
+    private function getLatestPipelineId()
+    {
+        return $this->makeRequest('GET', '/pipelines/')['size'];
     }
 }
