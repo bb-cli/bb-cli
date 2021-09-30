@@ -11,12 +11,6 @@ class Base
     public function __construct()
     {
         $currentClass = get_class($this);
-        if ($currentClass::CHECK_GIT_FOLDER) {
-            if (!is_dir(getcwd().'/.git')) {
-                e('ERROR: No git repository found in current directory.', 'red');
-                exit(1);
-            }
-        }
     }
 
     public function makeRequest($method = 'GET', $url = '', $payload = [])

@@ -48,6 +48,13 @@ if (in_array($userAction, $helpCommands)) {
     exit(0);
 }
 
+if ($actionClass::CHECK_GIT_FOLDER) {
+    if (!is_dir(getcwd().'/.git')) {
+        e('ERROR: No git repository found in current directory.', 'red');
+        exit(1);
+    }
+}
+
 $classMethodToCall = $actionClass::DEFAULT_METHOD;
 
 if (!is_null($userAction)) {
