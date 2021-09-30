@@ -62,7 +62,11 @@ if (!is_null($userAction)) {
 }
 
 if ($classMethodToCall === false) {
-    e("Method not exists. ({$argv[2]})", 'red');
+    e("Unknown method ", 'red', '', "\033[0m");
+    e("{$argv[2]}", 'cyan', '', "\033[0m");
+    e(" for ", 'red', '', "\033[0m");
+    e("{$userBaseAction}", 'cyan', '', "\033[0m");
+    e(" action.", 'red');
     exit(1);
 }
 
