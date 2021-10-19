@@ -43,13 +43,12 @@ class Pipeline extends Base
     {
         if (is_null($pipeLineNumber)) {
             $pipeLineNumber = $this->getLatestPipelineId();
+            e('Pipeline: '. $pipeLineNumber, 'yellow');
         }
 
         $response = $this->get($pipeLineNumber, true);
 
-        $state = array_get($response, 'state.name');
-
-        if ($state === 'COMPLETED') {
+        if (array_get($response, 'state.name') === 'COMPLETED') {
             e('');
             $this->get($pipeLineNumber, false);
             return;
