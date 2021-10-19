@@ -11,6 +11,7 @@ class Pr extends Base
     public const AVAILABLE_COMMANDS = [
         'list' => 'list, l',
         'diff' => 'diff, d',
+        'files' => 'files',
         'commits' => 'commits, c',
         'approve' => 'approve, a',
         'unApprove' => 'no-approve, na',
@@ -47,6 +48,15 @@ class Pr extends Base
     public function diff($prNumber)
     {
         e($this->makeRequest('GET', "/pullrequests/{$prNumber}/diff"), 'yellow');
+    }
+
+    public function files($prNumber)
+    {
+        $response = array_get($this->makeRequest('GET', "/pullrequests/{$prNumber}/diffstat"), 'values');
+
+        foreach ($response as $row) {
+            e(array_get($row, 'new.path'), 'yellow');
+        }
     }
 
     public function commits($prNumber)
