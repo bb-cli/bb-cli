@@ -17,6 +17,10 @@ __NOTE__: Before install this package, you should have **PHP** installed on your
 
 [View the documentation](https://bb-cli.github.io) for usage information.
 
+## Development
+
+This tool developed with help of [Github Copilot](https://copilot.github.com) :octocat:
+
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE) for more information.
