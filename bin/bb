@@ -27,13 +27,13 @@ $helpCommands = [
 $userBaseAction = $argv[1] ?? null;
 
 if (is_null($userBaseAction) || in_array($userBaseAction, $helpCommands)) {
-    e('Available actions:', 'green');
-    e(array_keys($actions), 'green');
+    o('Available actions:', 'green');
+    o(array_keys($actions), 'green');
     exit(0);
 }
 
 if (!isset($actions[$userBaseAction])) {
-    e("Given action is invalid: ({$userBaseAction})", 'red');
+    o("Given action is invalid: ({$userBaseAction})", 'red');
     exit(1);
 }
 
@@ -41,16 +41,16 @@ $actionClass = new $actions[$userBaseAction]();
 $userAction = $argv[2] ?? null;
 
 if (in_array($userAction, $helpCommands)) {
-    e('Available methods:', 'green');
+    o('Available methods:', 'green');
     foreach(array_values($actionClass::AVAILABLE_COMMANDS) as $command) {
-        e(implode(",\033[0;90m", explode(',', $command)), 'yellow');
+        o(implode(",\033[0;90m", explode(',', $command)), 'yellow');
     }
     exit(0);
 }
 
 if ($actionClass::CHECK_GIT_FOLDER) {
     if (!is_dir(getcwd().'/.git')) {
-        e('ERROR: No git repository found in current directory.', 'red');
+        o('ERROR: No git repository found in current directory.', 'red');
         exit(1);
     }
 }
@@ -62,11 +62,11 @@ if (!is_null($userAction)) {
 }
 
 if ($classMethodToCall === false) {
-    e("Unknown method ", 'red', '', "\033[0m");
-    e("{$argv[2]}", 'cyan', '', "\033[0m");
-    e(" for ", 'red', '', "\033[0m");
-    e("{$userBaseAction}", 'cyan', '', "\033[0m");
-    e(" action.", 'red');
+    o("Unknown method ", 'red', '', "\033[0m");
+    o("{$argv[2]}", 'cyan', '', "\033[0m");
+    o(" for ", 'red', '', "\033[0m");
+    o("{$userBaseAction}", 'cyan', '', "\033[0m");
+    o(" action.", 'red');
     exit(1);
 }
 
@@ -76,9 +76,9 @@ try {
         array_slice($argv, 3)
     );
 } catch (\ArgumentCountError $e) {
-    e('Too few arguments.', 'red');
+    o('Too few arguments.', 'red');
     exit(1);
 } catch (\Throwable $th) {
-    e($th->getMessage(), 'red');
+    o($th->getMessage(), 'red');
     exit(1);
 }

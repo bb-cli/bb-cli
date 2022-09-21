@@ -38,8 +38,8 @@ if (!function_exists('getRepoPath')) {
     }
 }
 
-if (!function_exists('e')) {
-    function e($data, $color = 'white', $prefix = '', $end = "\033[0m".PHP_EOL)
+if (!function_exists('o')) {
+    function o($data, $color = 'white', $prefix = '', $end = "\033[0m".PHP_EOL)
     {
         $colors = [
             'nocolor' => "\033[0m",
@@ -56,13 +56,13 @@ if (!function_exists('e')) {
         if (is_array($data)) {
             foreach ($data as $key => $value) {
                 if (is_array($value)) {
-                    e($value, $color, $prefix, $end);
+                    o($value, $color, $prefix, $end);
                 } else {
                     if (!is_int($key)) {
-                        e(ucfirst($key).': ', 'cyan', $prefix, $colors['nocolor']);
+                        o(ucfirst($key).': ', 'cyan', $prefix, $colors['nocolor']);
                     }
 
-                    e($value, 'yellow', '');
+                    o($value, 'yellow', '');
                 }
             }
         } else {
