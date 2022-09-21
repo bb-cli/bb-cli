@@ -42,12 +42,12 @@ class Pr extends Base
             ];
         }
 
-        e($result, 'yellow');
+        o($result, 'yellow');
     }
 
     public function diff($prNumber)
     {
-        e($this->makeRequest('GET', "/pullrequests/{$prNumber}/diff"), 'yellow');
+        o($this->makeRequest('GET', "/pullrequests/{$prNumber}/diff"), 'yellow');
     }
 
     public function files($prNumber)
@@ -55,7 +55,7 @@ class Pr extends Base
         $response = array_get($this->makeRequest('GET', "/pullrequests/{$prNumber}/diffstat"), 'values');
 
         foreach ($response as $row) {
-            e(array_get($row, 'new.path'), 'yellow');
+            o(array_get($row, 'new.path'), 'yellow');
         }
     }
 
@@ -67,39 +67,39 @@ class Pr extends Base
             $result[] = trim(str_replace('\n', PHP_EOL, array_get($prInfo, 'summary.raw')));
         }
 
-        e($result, 'yellow');
+        o($result, 'yellow');
     }
 
     public function approve($prNumber)
     {
         $this->makeRequest('POST', "/pullrequests/{$prNumber}/approve");
-        e('Approved.', 'green');
+        o('Approved.', 'green');
     }
 
     public function unApprove($prNumber)
     {
-        e($this->makeRequest('DELETE', "/pullrequests/{$prNumber}/approve"));
+        o($this->makeRequest('DELETE', "/pullrequests/{$prNumber}/approve"));
     }
 
     public function requestChanges($prNumber)
     {
-        e($this->makeRequest('POST', "/pullrequests/{$prNumber}/request-changes"));
+        o($this->makeRequest('POST', "/pullrequests/{$prNumber}/request-changes"));
     }
 
     public function unRequestChanges($prNumber)
     {
-        e($this->makeRequest('DELETE', "/pullrequests/{$prNumber}/request-changes"));
+        o($this->makeRequest('DELETE', "/pullrequests/{$prNumber}/request-changes"));
     }
 
     public function decline($prNumber)
     {
         $this->makeRequest('POST', "/pullrequests/{$prNumber}/decline");
-        e('OK.', 'green');
+        o('OK.', 'green');
     }
 
     public function merge($prNumber)
     {
-        e($this->makeRequest('POST', "/pullrequests/{$prNumber}/merge")['state'], 'green');
+        o($this->makeRequest('POST', "/pullrequests/{$prNumber}/merge")['state'], 'green');
     }
 
     public function create($fromBranch, $toBranch = '')
@@ -123,7 +123,7 @@ class Pr extends Base
             ],
         ]);
 
-        e([
+        o([
             'id' => array_get($response, 'id'),
             'link' => array_get($response, 'links.html.href'),
         ]);

@@ -60,6 +60,6 @@ class Branch extends Base
             return $result;
         }
 
-        e($result, 'yellow');
+        o($result, 'yellow');
     }
 }

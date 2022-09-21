@@ -23,7 +23,7 @@ class Pipeline extends Base
         }
 
         $repoPath = getRepoPath();
-        e(
+        o(
             [
                 'id' => $pipeLineNumber,
                 'creator' => array_get($response, 'creator.display_name'),
@@ -43,18 +43,18 @@ class Pipeline extends Base
     {
         if (is_null($pipeLineNumber)) {
             $pipeLineNumber = $this->getLatestPipelineId();
-            e('Pipeline: '. $pipeLineNumber, 'yellow');
+            o('Pipeline: '. $pipeLineNumber, 'yellow');
         }
 
         $response = $this->get($pipeLineNumber, true);
 
         if (array_get($response, 'state.name') === 'COMPLETED') {
-            e('');
+            o('');
             $this->get($pipeLineNumber, false);
             return;
         }
 
-        e('.', 'yellow', '', '');
+        o('.', 'yellow', '', '');
         sleep(2);
 
         $this->wait($pipeLineNumber);

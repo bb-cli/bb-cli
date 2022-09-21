@@ -16,9 +16,9 @@ class Auth extends Base
 
     public function saveLoginInfo()
     {
-        e('This action requires app password:', 'yellow');
-        e('If you don\'t have a app password you may create by following this link:', 'yellow');
-        e('https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/', 'green');
+        o('This action requires app password:', 'yellow');
+        o('If you don\'t have a app password you may create by following this link:', 'yellow');
+        o('https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/', 'green');
 
         $username = getUserInput('Username: ');
         $appPassword = getUserInput('App password: ');
@@ -31,9 +31,9 @@ class Auth extends Base
         ]);
 
         if ($saveToFile !== false) {
-            e('Auth info saved.', 'green');
+            o('Auth info saved.', 'green');
         } else {
-            e('Cannot save file to: '.config('userConfigFilePath'), 'red');
+            o('Cannot save file to: '.config('userConfigFilePath'), 'red');
         }
     }
 
@@ -42,11 +42,11 @@ class Auth extends Base
         $authInfo = userConfig('auth');
 
         if (!$authInfo) {
-            e('You have to configure auth info to use this command.', 'red');
-            e('Run "bb auth" first.', 'yellow');
+            o('You have to configure auth info to use this command.', 'red');
+            o('Run "bb auth" first.', 'yellow');
             exit(1);
         }
 
-        e($authInfo);
+        o($authInfo);
     }
 }

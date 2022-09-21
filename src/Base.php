@@ -36,7 +36,7 @@ class Base
         $result = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            echo 'Error:' . curl_error($ch);
+            e('Error:' . curl_error($ch));
             die;
         }
 
@@ -89,8 +89,8 @@ class Base
     private function checkAuth()
     {
         if (!userConfig('auth')) {
-            e('You have to configure auth info to use this command.', 'red');
-            e('Run "bb auth" first.', 'yellow');
+            o('You have to configure auth info to use this command.', 'red');
+            o('Run "bb auth" first.', 'yellow');
             exit(1);
         }
     }
