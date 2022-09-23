@@ -4,16 +4,35 @@ namespace BBCli\BBCli\Actions;
 
 use BBCli\BBCli\Base;
 
+/**
+ * Pipeline
+ * All commands for pipeline.
+ *
+ * @see https://bb-cli.github.io/docs/commands/pipeline
+ */
 class Pipeline extends Base
 {
+    /**
+     * Pipeline default command.
+     */
     public const DEFAULT_METHOD = 'latest';
 
+    /**
+     * Pipeline commands.
+     */
     public const AVAILABLE_COMMANDS = [
         'get' => 'get',
         'latest' => 'latest',
         'wait' => 'wait',
     ];
 
+    /**
+     * Gets details of given pipeline.
+     *
+     * @param  int  $pipeLineNumber
+     * @param  bool $return
+     * @return void
+     */
     public function get($pipeLineNumber, $return = false)
     {
         $response = $this->makeRequest('GET', "/pipelines/{$pipeLineNumber}");
@@ -39,6 +58,12 @@ class Pipeline extends Base
         );
     }
 
+    /**
+     * Hangs on terminal, until given pipeline finishes.
+     *
+     * @param  int $pipeLineNumber
+     * @return void
+     */
     public function wait($pipeLineNumber = null)
     {
         if (is_null($pipeLineNumber)) {
@@ -60,11 +85,21 @@ class Pipeline extends Base
         $this->wait($pipeLineNumber);
     }
 
+    /**
+     * Gets details of latest pipeline.
+     *
+     * @return void
+     */
     public function latest()
     {
         return $this->get($this->getLatestPipelineId());
     }
 
+    /**
+     * For the last deploy running on the pipeline.
+     *
+     * @return void
+     */
     private function getLatestPipelineId()
     {
         return $this->makeRequest('GET', '/pipelines/')['size'];

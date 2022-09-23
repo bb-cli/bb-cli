@@ -4,15 +4,43 @@ namespace BBCli\BBCli;
 
 class Base
 {
+    /**
+     * Default command run for actions.
+     *
+     * Example: 'list'
+     */
     public const DEFAULT_METHOD = 'DEFAULT_METHOD_NOT_DEFINED';
+
+    /**
+     * Defined to custom commands for actions.
+     *
+     * Example: 'list' => 'list, l'
+     */
     public const AVAILABLE_COMMANDS = [];
+
+    /**
+     * Checks the repo .git folder.
+     */
     public const CHECK_GIT_FOLDER = true;
 
+    /**
+     * Construct
+     */
     public function __construct()
     {
         $currentClass = get_class($this);
     }
 
+    /**
+     * Make requests for Bitbucket Rest API.
+     *
+     * @param  string $method
+     * @param  string $url
+     * @param  array  $payload
+     * @return mixed
+     * @throws \Exception
+     * @see    https://developer.atlassian.com/cloud/bitbucket/rest
+     */
     public function makeRequest($method = 'GET', $url = '', $payload = [])
     {
         $this->checkAuth();
@@ -68,6 +96,12 @@ class Base
         return $jsonResult;
     }
 
+    /**
+     * Method name from alias.
+     *
+     * @param  string $alias
+     * @return mixed
+     */
     public function getMethodNameFromAlias($alias)
     {
         $currentClass = get_class($this);
@@ -86,6 +120,12 @@ class Base
         return false;
     }
 
+    /**
+     * Checks the auth file.
+     * If an error: run bb auth command.
+     *
+     * @return void
+     */
     private function checkAuth()
     {
         if (!userConfig('auth')) {

@@ -4,16 +4,38 @@ namespace BBCli\BBCli\Actions;
 
 use BBCli\BBCli\Base;
 
+/**
+ * Authentication
+ * All commands for auth.
+ *
+ * @see https://bb-cli.github.io/authentication
+ */
 class Auth extends Base
 {
+    /**
+     * Authentication default command.
+     */
     public const DEFAULT_METHOD = 'saveLoginInfo';
+
+    /**
+     * Checks the repo .git folder.
+     */
     public const CHECK_GIT_FOLDER = false;
 
+    /**
+     * Authentication commans.
+     */
     public const AVAILABLE_COMMANDS = [
         'saveLoginInfo' => 'save',
         'show' => 'show',
     ];
 
+    /**
+     * It saves your user information in the config folder.
+     * This is used in project (BB-CLI) process.
+     *
+     * @return void
+     */
     public function saveLoginInfo()
     {
         o('This action requires app password:', 'yellow');
@@ -37,6 +59,11 @@ class Auth extends Base
         }
     }
 
+    /**
+     * Shows config information (user detail).
+     *
+     * @return void
+     */
     public function show()
     {
         $authInfo = userConfig('auth');

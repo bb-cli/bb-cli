@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__.'/../src/utils/helpers.php';
+require_once __DIR__.'/../src/Utils/Helpers.php';
 require_once __DIR__.'/../src/Base.php';
 
 $actionsFolder = __DIR__.'/../src/Actions';

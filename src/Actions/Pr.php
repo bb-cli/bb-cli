@@ -4,10 +4,22 @@ namespace BBCli\BBCli\Actions;
 
 use BBCli\BBCli\Base;
 
+/**
+ * Pull Request
+ * All commands for pull request.
+ *
+ * @see https://bb-cli.github.io/docs/commands/pull-request
+ */
 class Pr extends Base
 {
+    /**
+     * Pull request default command.
+     */
     public const DEFAULT_METHOD = 'list';
 
+    /**
+     * Pull request commands.
+     */
     public const AVAILABLE_COMMANDS = [
         'list' => 'list, l',
         'diff' => 'diff, d',
@@ -22,6 +34,12 @@ class Pr extends Base
         'create' => 'create',
     ];
 
+    /**
+     * List pull request for repository.
+     *
+     * @param  string $destination
+     * @return void
+     */
     public function list($destination = '')
     {
         $result = [];
@@ -45,11 +63,24 @@ class Pr extends Base
         o($result, 'yellow');
     }
 
+    /**
+     * Get pull request diff.
+     *
+     * @param  int $prNumber
+     * @return void
+     */
     public function diff($prNumber)
     {
         o($this->makeRequest('GET', "/pullrequests/{$prNumber}/diff"), 'yellow');
     }
 
+    /**
+     * Diff stats file.
+     *
+     * @param  int $prNumber
+     * @return void
+     * @throws \Exception
+     */
     public function files($prNumber)
     {
         $response = array_get($this->makeRequest('GET', "/pullrequests/{$prNumber}/diffstat"), 'values');
@@ -59,6 +90,13 @@ class Pr extends Base
         }
     }
 
+    /**
+     * Get pull request commits.
+     *
+     * @param $prNumber
+     * @return void
+     * @throws \Exception
+     */
     public function commits($prNumber)
     {
         $result = [];
@@ -70,38 +108,88 @@ class Pr extends Base
         o($result, 'yellow');
     }
 
+    /**
+     * Approve pull request.
+     *
+     * @param  int $prNumber
+     * @return void
+     * @throws \Exception
+     */
     public function approve($prNumber)
     {
         $this->makeRequest('POST', "/pullrequests/{$prNumber}/approve");
         o('Approved.', 'green');
     }
 
+    /**
+     * Revert pull request to not approved status.
+     *
+     * @param  int $prNumber
+     * @return void
+     * @throws \Exception
+     */
     public function unApprove($prNumber)
     {
         o($this->makeRequest('DELETE', "/pullrequests/{$prNumber}/approve"));
     }
 
+    /**
+     *  Request changes for pull reques
+     *
+     * @param  int $prNumber
+     * @return void
+     * @throws \Exception
+     */
     public function requestChanges($prNumber)
     {
         o($this->makeRequest('POST', "/pullrequests/{$prNumber}/request-changes"));
     }
 
+    /**
+     * Revert pull request to not request changes status.
+     *
+     * @param  int $prNumber
+     * @return void
+     * @throws \Exception
+     */
     public function unRequestChanges($prNumber)
     {
         o($this->makeRequest('DELETE', "/pullrequests/{$prNumber}/request-changes"));
     }
 
+    /**
+     * Decline pull request.
+     *
+     * @param  int $prNumber
+     * @return void
+     * @throws \Exception
+     */
     public function decline($prNumber)
     {
         $this->makeRequest('POST', "/pullrequests/{$prNumber}/decline");
         o('OK.', 'green');
     }
 
+    /**
+     * Merge pull request.
+     *
+     * @param  int $prNumber
+     * @return void
+     * @throws \Exception
+     */
     public function merge($prNumber)
     {
         o($this->makeRequest('POST', "/pullrequests/{$prNumber}/merge")['state'], 'green');
     }
 
+    /**
+     * Create pull request from "x" to test "y".
+     *
+     * @param  string $fromBranch
+     * @param  string $toBranch
+     * @return void
+     * @throws \Exception
+     */
     public function create($fromBranch, $toBranch = '')
     {
         if (empty($toBranch)) {

@@ -1,7 +1,6 @@
 <?php
 
 if (!function_exists('array_get')) {
-    // get data from array using dot notation
     function array_get($array, $key, $default = null)
     {
         if (is_null($key)) {
@@ -109,7 +108,6 @@ if (!function_exists('userConfig')) {
             return $config;
         }
 
-        // update file if "$key" parameter is array
         if (is_array($key)) {
             $arrayKey = key($key);
             $config[$arrayKey] = $key[$arrayKey];
