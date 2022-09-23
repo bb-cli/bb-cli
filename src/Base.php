@@ -2,6 +2,13 @@
 
 namespace BBCli\BBCli;
 
+/**
+ * BB-CLI Base Class
+ *
+ * Extending class: Auth, Branch, Pr etc...
+ *
+ * @see https://bb-cli.github.io/docs/commands
+ */
 class Base
 {
     /**
