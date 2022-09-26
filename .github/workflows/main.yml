@@ -1,4 +1,4 @@
-name: build-phar-file
+name: Create new release
 
 on:
   push:
@@ -11,20 +11,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
-    - uses: shivammathur/setup-php@v2
+    - name: Setup php
+      uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.1'
-        run: |
-          php --define phar.readonly=0 create-phar.php # creates bb.phar file
-          ls -lah
-      
-    - uses: svenstaro/upload-release-action@v2
+        php-version: '8.0'
+        extensions: curl, mbstring, json
+
+    - name: Build
+      run: |
+          php --define phar.readonly=0 create-phar.php
+
+    - name: Release
+      uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: bb.phar
-        asset_name: bb.phar
+        asset_name: bb
         tag: ${{ github.ref }}
+        release_name: "Release ${{ github.ref }}"
         overwrite: true
-        body: "Release"
