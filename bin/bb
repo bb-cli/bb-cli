@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__.'/../src/Utils/Helpers.php';
+require_once __DIR__.'/../src/utils/helpers.php';
 require_once __DIR__.'/../src/Base.php';
 
 $actionsFolder = __DIR__.'/../src/Actions';
@@ -24,6 +24,17 @@ $helpCommands = [
     '-h',
 ];
 
+$requiredExtensions = [
+    'json',
+    'curl'
+];
+
+if (array_diff($requiredExtensions, get_loaded_extensions())) {
+    o("PHP extensions is incomplete. Required installing: ", 'red');
+    o($requiredExtensions, 'yellow');
+    exit(0);
+}
+
 $userBaseAction = $argv[1] ?? null;
 
 if (is_null($userBaseAction) || in_array($userBaseAction, $helpCommands)) {
@@ -42,7 +53,7 @@ $userAction = $argv[2] ?? null;
 
 if (in_array($userAction, $helpCommands)) {
     o('Available methods:', 'green');
-    foreach(array_values($actionClass::AVAILABLE_COMMANDS) as $command) {
+    foreach (array_values($actionClass::AVAILABLE_COMMANDS) as $command) {
         o(implode(",\033[0;90m", explode(',', $command)), 'yellow');
     }
     exit(0);
