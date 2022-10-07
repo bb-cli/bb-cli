@@ -4,6 +4,12 @@
 require_once __DIR__.'/../src/utils/helpers.php';
 require_once __DIR__.'/../src/Base.php';
 
+if (version_compare(phpversion(), '7.0.0') < 0) {
+    o('Your PHP version must be equal or higher than "7.0.0" to use bb-cli', 'red');
+    o('PHP version: '.phpversion(), 'yellow');
+    exit(1);
+}
+
 $requiredExtensions = [
     'json',
     'curl',
@@ -11,9 +17,9 @@ $requiredExtensions = [
 ];
 
 if ($missingExtensions = array_diff($requiredExtensions, get_loaded_extensions())) {
-    o("PHP extensions is incomplete. Required installing: ", 'red');
+    o('PHP extensions is incomplete. Required installing:', 'red');
     o($missingExtensions, 'yellow');
-    exit(0);
+    exit(1);
 }
 
 $actionsFolder = __DIR__.'/../src/Actions';
