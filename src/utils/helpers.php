@@ -59,9 +59,10 @@ if (!function_exists('o')) {
                 } else {
                     if (!is_int($key)) {
                         o(ucfirst($key).': ', 'cyan', $prefix, $colors['nocolor']);
+                        o($value, 'yellow', '');
+                    } else {
+                        o($value, $color, '');
                     }
-
-                    o($value, 'yellow', '');
                 }
             }
         } else {
