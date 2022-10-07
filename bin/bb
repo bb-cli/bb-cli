@@ -10,9 +10,9 @@ $requiredExtensions = [
     'mbstring',
 ];
 
-if (array_diff($requiredExtensions, get_loaded_extensions())) {
+if ($missingExtensions = array_diff($requiredExtensions, get_loaded_extensions())) {
     o("PHP extensions is incomplete. Required installing: ", 'red');
-    o($requiredExtensions, 'yellow');
+    o($missingExtensions, 'yellow');
     exit(0);
 }
 
@@ -64,7 +64,7 @@ if (!isset($actions[$userBaseAction])) {
 $actionClass = new $actions[$userBaseAction]();
 $userAction = $argv[2] ?? null;
 
-if (in_array($userAction, $helpCommands)) {
+if (in_array($userAction, $staticCommands['help'])) {
     o('Available methods:', 'green');
     foreach (array_values($actionClass::AVAILABLE_COMMANDS) as $command) {
         o(implode(",\033[0;90m", explode(',', $command)), 'yellow');

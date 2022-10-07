@@ -6,7 +6,7 @@ Use Bitbucket from command line. With this app you can see pull request, pipelin
 
 ## Installation
 
-__NOTE__: Before install this package, you should have **PHP** installed on your machine.
+__NOTE__: Before install this package, you should have **PHP >= 7** installed on your machine.
 
 * Download standalone binary from [releases](https://github.com/bb-cli/bb-cli/releases)
 * Move downloaded file to path like `mv bb /usr/local/bin/bb`
