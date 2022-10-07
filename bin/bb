@@ -4,6 +4,18 @@
 require_once __DIR__.'/../src/utils/helpers.php';
 require_once __DIR__.'/../src/Base.php';
 
+$requiredExtensions = [
+    'json',
+    'curl',
+    'mbstring',
+];
+
+if (array_diff($requiredExtensions, get_loaded_extensions())) {
+    o("PHP extensions is incomplete. Required installing: ", 'red');
+    o($requiredExtensions, 'yellow');
+    exit(0);
+}
+
 $actionsFolder = __DIR__.'/../src/Actions';
 foreach (scandir($actionsFolder) as $file) {
     if (substr($file, -4) === '.php') {
@@ -18,26 +30,27 @@ $actions = [
     'auth' => \BBCli\BBCli\Actions\Auth::class,
 ];
 
-$helpCommands = [
-    'help',
-    '--help',
-    '-h',
+$staticCommands = [
+    'help' => [
+        'help',
+        '--help',
+        '-h',
+    ],
+    'version' => [
+        'version',
+        '--version',
+        '-v',
+    ],
 ];
-
-$requiredExtensions = [
-    'json',
-    'curl'
-];
-
-if (array_diff($requiredExtensions, get_loaded_extensions())) {
-    o("PHP extensions is incomplete. Required installing: ", 'red');
-    o($requiredExtensions, 'yellow');
-    exit(0);
-}
 
 $userBaseAction = $argv[1] ?? null;
 
-if (is_null($userBaseAction) || in_array($userBaseAction, $helpCommands)) {
+if (in_array($userBaseAction, $staticCommands['version'])) {
+    o('Version: 0.0.0', 'green');
+    exit(0);
+}
+
+if (is_null($userBaseAction) || in_array($userBaseAction, $staticCommands['help'])) {
     o('Available actions:', 'green');
     o(array_keys($actions), 'green');
     exit(0);
