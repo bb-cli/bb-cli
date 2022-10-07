@@ -71,7 +71,7 @@ class Base
         $result = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            e('Error:' . curl_error($ch));
+            o('Error:' . curl_error($ch));
             die;
         }
 
