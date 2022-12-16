@@ -34,6 +34,7 @@ $actions = [
     'pipeline' => \BBCli\BBCli\Actions\Pipeline::class,
     'branch' => \BBCli\BBCli\Actions\Branch::class,
     'auth' => \BBCli\BBCli\Actions\Auth::class,
+    'browse' => \BBCli\BBCli\Actions\Browse::class,
 ];
 
 $staticCommands = [
