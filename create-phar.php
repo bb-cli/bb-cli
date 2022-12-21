@@ -2,11 +2,10 @@
 
 $pharIndexFile = 'phar-index.php';
 
-# find => replace
 $replacements = [
     '/../src/' => '/src/',
     "#!/usr/bin/env php\n" => '',
-    'Version: 0.0.0' => 'Version: '.trim(exec('git describe --tags --abbrev=0'))
+    '#APP_VERSION#' => trim(exec('git describe --tags --abbrev=0'))
 ];
 
 file_put_contents(
