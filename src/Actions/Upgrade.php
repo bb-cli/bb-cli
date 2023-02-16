@@ -12,6 +12,11 @@ use BBCli\BBCli\Base;
 class Upgrade extends Base
 {
     /**
+     * Checks the repo .git folder.
+     */
+    public const CHECK_GIT_FOLDER = false;
+
+    /**
      * Upgrade default command.
      */
     public const DEFAULT_METHOD = 'index';
