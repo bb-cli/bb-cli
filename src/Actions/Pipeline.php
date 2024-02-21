@@ -24,6 +24,7 @@ class Pipeline extends Base
         'get' => 'get',
         'latest' => 'latest',
         'wait' => 'wait',
+        'run' => 'run',
     ];
 
     /**
@@ -87,8 +88,6 @@ class Pipeline extends Base
 
     /**
      * Gets details of latest pipeline.
-     *
-     * @return void
      */
     public function latest()
     {
@@ -96,9 +95,23 @@ class Pipeline extends Base
     }
 
     /**
+     * Run pipeline for given branch.
+     */
+    public function run($branch)
+    {
+        $response = $this->makeRequest('POST', '/pipelines/', [
+            'target' => [
+                'ref_type' => 'branch',
+                'type' => 'pipeline_ref_target',
+                'ref_name' => $branch
+            ]
+        ]);
+
+        o($response);
+    }
+
+    /**
      * For the last deploy running on the pipeline.
-     *
-     * @return void
      */
     private function getLatestPipelineId()
     {
