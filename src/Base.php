@@ -84,6 +84,7 @@ class Base
 
             $allowedStatuses = [409];
             if (!in_array($httpStatusCode, $allowedStatuses)) {
+                o($result);
                 throw new \Exception('An error occurred, status code: '.$httpStatusCode, 1);
             }
         }
