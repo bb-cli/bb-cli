@@ -51,12 +51,32 @@ class Pr extends Base
                 continue;
             }
 
+            $prDetail = $this->makeRequest('GET', "/pullrequests/{$prInfo['id']}");
+
             $result[] = [
                 'id' => $prInfo['id'],
                 'author' => array_get($prInfo, 'author.nickname'),
                 'source' => array_get($prInfo, 'source.branch.name'),
                 'destination' => array_get($prInfo, 'destination.branch.name'),
                 'link' => array_get($prInfo, 'links.html.href'),
+                'reviewers' => implode(
+                    ', ',
+                    array_map(function ($reviewer) {
+                        return $reviewer['display_name'];
+                    }, $prDetail['reviewers'])
+                ),
+                'participants' => implode(
+                    ' | ',
+                    array_filter(
+                        array_map(function ($participant) {
+                            return $participant['state'] ? sprintf(
+                                '%s -> %s',
+                                $participant['user']['display_name'],
+                                $participant['state']
+                            ) : null;
+                        }, $prDetail['participants'])
+                    )
+                ),
             ];
         }
 
@@ -111,14 +131,33 @@ class Pr extends Base
     /**
      * Approve pull request.
      *
-     * @param  int $prNumber
+     * @param  array $prNumbers
      * @return void
      * @throws \Exception
      */
-    public function approve($prNumber)
+    public function approve(...$prNumbers)
     {
-        $this->makeRequest('POST', "/pullrequests/{$prNumber}/approve");
-        o('Approved.', 'green');
+        if (empty($prNumbers)) {
+            throw new \Exception('Pr number required.', 1);
+        }
+
+        // if first param is zero than approve all
+        if ($prNumbers[0] == 0) {
+            $prNumbers = [];
+
+            foreach ($this->makeRequest('GET', '/pullrequests?state=OPEN')['values'] as $prInfo) {
+                $prNumbers[] = $prInfo['id'];
+            }
+
+            if (empty($prNumbers)) {
+                throw new \Exception('Pr not found.', 1);
+            }
+        }
+
+        foreach ($prNumbers as $prNumber) {
+            $this->makeRequest('POST', "/pullrequests/{$prNumber}/approve");
+            o("{$prNumber} Approved.", 'green');
+        }
     }
 
     /**
@@ -134,7 +173,7 @@ class Pr extends Base
     }
 
     /**
-     *  Request changes for pull reques
+     *  Request changes for pull request
      *
      * @param  int $prNumber
      * @return void
