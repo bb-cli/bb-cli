@@ -27,7 +27,7 @@ class Branch extends Base
     ];
 
     /**
-     * List branches that latest commit user name contains "xyz".
+     * List branches that latest commit username contains "xyz".
      *
      * @param  string $user
      * @return void
