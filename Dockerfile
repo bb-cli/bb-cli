@@ -7,4 +7,4 @@ RUN <<-EOF
         apt-get install -y git
         apt-get clean
         rm -rf /var/lib/apt/lists/*
-    EOF
+EOF
