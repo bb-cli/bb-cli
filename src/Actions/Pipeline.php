@@ -25,6 +25,7 @@ class Pipeline extends Base
         'latest' => 'latest',
         'wait' => 'wait',
         'run' => 'run',
+        'custom' => 'custom, c',
     ];
 
     /**
@@ -108,6 +109,34 @@ class Pipeline extends Base
         ]);
 
         o($response);
+    }
+
+    /**
+     * Run pipeline for given branch on given pipeline.
+     */
+    public function custom($branch, $pipeline)
+    {
+        $response = $this->makeRequest('POST', '/pipelines/', [
+            'target' => [
+                'ref_type' => 'branch',
+                'type' => 'pipeline_ref_target',
+                'ref_name' => $branch,
+                'selector' => [
+                    'type' => 'custom',
+                    'pattern' => $pipeline,
+                ],
+            ]
+        ]);
+
+        $pipeLineNumber = $response['build_number'];
+        $repoPath = getRepoPath();
+
+        o(
+            [
+                'link' => "https://bitbucket.org/$repoPath/addon/pipelines/home#!/results/$pipeLineNumber",
+            ],
+            'yellow'
+        );
     }
 
     /**
