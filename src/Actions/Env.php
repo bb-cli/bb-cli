@@ -72,7 +72,7 @@ class Env extends Base
         $response = $this->makeRequest('POST', "/deployments_config/environments/$envUuid/variables", [
             'key' => $key,
             'value' => $value,
-            'secured' => $secured,
+            'secured' => (bool) $secured,
         ]);
 
         $this->variableResponse($response);
@@ -86,7 +86,7 @@ class Env extends Base
         $response = $this->makeRequest('PUT', "/deployments_config/environments/$envUuid/variables/$varUuid", [
             'key' => $key,
             'value' => $value,
-            'secured' => $secured,
+            'secured' => (bool) $secured,
         ]);
 
         $this->variableResponse($response);
