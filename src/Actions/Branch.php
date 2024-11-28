@@ -15,12 +15,12 @@ class Branch extends Base
     /**
      * Branch default command.
      */
-    public const DEFAULT_METHOD = 'list';
+    const DEFAULT_METHOD = 'list';
 
     /**
      * Branch commands.
      */
-    public const AVAILABLE_COMMANDS = [
+    const AVAILABLE_COMMANDS = [
         'list' => 'list, l',
         'user' => 'user, u',
         'name' => 'name, n',
@@ -84,7 +84,7 @@ class Branch extends Base
             ];
         }
 
-        if (isset($response['next']) && !empty($response['next'])) {
+        if (!empty($response['next'])) {
             $result = array_merge($result, $this->list($user, $branch, $page + 1, true) ?: []);
         }
 

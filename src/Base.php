@@ -16,26 +16,26 @@ class Base
      *
      * Example: 'list'
      */
-    public const DEFAULT_METHOD = 'DEFAULT_METHOD_NOT_DEFINED';
+    const DEFAULT_METHOD = 'DEFAULT_METHOD_NOT_DEFINED';
 
     /**
      * Defined to custom commands for actions.
      *
      * Example: 'list' => 'list, l'
      */
-    public const AVAILABLE_COMMANDS = [];
+    const AVAILABLE_COMMANDS = [];
 
     /**
      * Checks the repo .git folder.
      */
-    public const CHECK_GIT_FOLDER = true;
+    const CHECK_GIT_FOLDER = true;
 
     /**
      * Construct
      */
     public function __construct()
     {
-        $currentClass = get_class($this);
+        //
     }
 
     /**
@@ -112,13 +112,8 @@ class Base
      */
     public function getMethodNameFromAlias($alias)
     {
-        $currentClass = get_class($this);
-
-        foreach ($currentClass::AVAILABLE_COMMANDS as $method => $methodAliases) {
-            $methodAliases = array_map(
-                'trim',
-                explode(', ', $methodAliases)
-            );
+        foreach (static::AVAILABLE_COMMANDS as $method => $methodAliases) {
+            $methodAliases = array_map('trim', explode(', ', $methodAliases));
 
             if (in_array($alias, $methodAliases)) {
                 return $method;
@@ -126,6 +121,22 @@ class Base
         }
 
         return false;
+    }
+
+    /**
+     * Lists available commands in shell autocomplete format.
+     *
+     * @return void
+     */
+    public function listCommandsForAutocomplete()
+    {
+        $commands = array_map(function($aliases) {
+            return trim(explode(',', $aliases)[0]);
+        }, static::AVAILABLE_COMMANDS);
+
+        sort($commands);
+
+        echo implode(' ', $commands);
     }
 
     /**

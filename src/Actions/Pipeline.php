@@ -15,12 +15,12 @@ class Pipeline extends Base
     /**
      * Pipeline default command.
      */
-    public const DEFAULT_METHOD = 'latest';
+    const DEFAULT_METHOD = 'latest';
 
     /**
      * Pipeline commands.
      */
-    public const AVAILABLE_COMMANDS = [
+    const AVAILABLE_COMMANDS = [
         'get' => 'get',
         'latest' => 'latest',
         'wait' => 'wait',

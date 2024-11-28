@@ -14,12 +14,12 @@ class Browse extends Base
     /**
      * Browse default command.
      */
-    public const DEFAULT_METHOD = 'browse';
+    const DEFAULT_METHOD = 'browse';
 
     /**
      * Browse commands.
      */
-    public const AVAILABLE_COMMANDS = [
+    const AVAILABLE_COMMANDS = [
         'browse' => 'browse, b',
         'show' => 'show, url',
     ];

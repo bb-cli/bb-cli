@@ -38,6 +38,7 @@ $actions = [
     'auth' => \BBCli\BBCli\Actions\Auth::class,
     'browse' => \BBCli\BBCli\Actions\Browse::class,
     'upgrade' => \BBCli\BBCli\Actions\Upgrade::class,
+    'env' => \BBCli\BBCli\Actions\Env::class,
 ];
 
 $staticCommands = [
@@ -51,18 +52,30 @@ $staticCommands = [
         '--version',
         '-v',
     ],
+    'autocomplete' => [
+        'autocomplete',
+        '--autocomplete',
+    ],
 ];
 
 $userBaseAction = $argv[1] ?? null;
 
+// Print version
 if (in_array($userBaseAction, $staticCommands['version'])) {
     o('Version: '.APP_VERSION, 'green');
     exit(0);
 }
 
+// Print help
 if (is_null($userBaseAction) || in_array($userBaseAction, $staticCommands['help'])) {
     o('Available actions:', 'green');
     o(array_keys($actions), 'green');
+    exit(0);
+}
+
+// Print autocomplete
+if (in_array($userBaseAction, $staticCommands['autocomplete'])) {
+    echo implode(' ', array_keys($actions));
     exit(0);
 }
 
@@ -74,14 +87,22 @@ if (!isset($actions[$userBaseAction])) {
 $actionClass = new $actions[$userBaseAction]();
 $userAction = $argv[2] ?? null;
 
+// Print help for action
 if (in_array($userAction, $staticCommands['help'])) {
     o('Available methods:', 'green');
-    foreach (array_values($actionClass::AVAILABLE_COMMANDS) as $command) {
+    foreach ($actionClass::AVAILABLE_COMMANDS as $command) {
         o(implode(",\033[0;90m", explode(',', $command)), 'yellow');
     }
     exit(0);
 }
 
+//Print autocomplete for action
+if (in_array($userAction, $staticCommands['autocomplete'])) {
+    $actionClass->listCommandsForAutocomplete();
+    exit(0);
+}
+
+// Check if git folder exists
 if ($actionClass::CHECK_GIT_FOLDER) {
     if (!is_dir(getcwd().'/.git')) {
         o('ERROR: No git repository found in current directory.', 'red');
@@ -109,10 +130,12 @@ try {
         [$actionClass, $classMethodToCall],
         array_slice($argv, 3)
     );
-} catch (\ArgumentCountError $e) {
-    o('Too few arguments.', 'red');
-    exit(1);
-} catch (\Throwable $th) {
-    o($th->getMessage(), 'red');
+} catch (\Throwable $e) {
+    if (strpos($e->getMessage(), 'Too few arguments') !== false) {
+        o('Too few arguments.', 'red');
+    } else {
+        o($e->getMessage(), 'red');
+    }
+
     exit(1);
 }
