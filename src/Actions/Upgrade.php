@@ -49,7 +49,7 @@ class Upgrade extends Base
         if (APP_VERSION < $repo->tag_name) {
             $runningFile = \Phar::running(false);
 
-            o('Fething new version ('.$repo->tag_name.') ...', 'green');
+            o('Fetching new version ('.$repo->tag_name.') ...', 'green');
 
             file_put_contents(
                 $runningFile,

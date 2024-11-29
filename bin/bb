@@ -4,7 +4,7 @@
 require_once __DIR__.'/../src/utils/helpers.php';
 require_once __DIR__.'/../src/Base.php';
 
-define('APP_VERSION', '#APP_VERSION#');
+const APP_VERSION = '#APP_VERSION#';
 
 if (version_compare(phpversion(), '7.0.0') < 0) {
     o('Your PHP version must be equal or higher than "7.0.0" to use bb-cli', 'red');
