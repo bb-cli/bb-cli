@@ -15,17 +15,17 @@ class Auth extends Base
     /**
      * Authentication default command.
      */
-    public const DEFAULT_METHOD = 'saveLoginInfo';
+    const DEFAULT_METHOD = 'saveLoginInfo';
 
     /**
      * Checks the repo .git folder.
      */
-    public const CHECK_GIT_FOLDER = false;
+    const CHECK_GIT_FOLDER = false;
 
     /**
      * Authentication commans.
      */
-    public const AVAILABLE_COMMANDS = [
+    const AVAILABLE_COMMANDS = [
         'saveLoginInfo' => 'save',
         'show' => 'show',
     ];

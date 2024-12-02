@@ -15,12 +15,12 @@ class Pr extends Base
     /**
      * Pull request default command.
      */
-    public const DEFAULT_METHOD = 'list';
+    const DEFAULT_METHOD = 'list';
 
     /**
      * Pull request commands.
      */
-    public const AVAILABLE_COMMANDS = [
+    const AVAILABLE_COMMANDS = [
         'list' => 'list, l',
         'diff' => 'diff, d',
         'files' => 'files',
