@@ -14,12 +14,12 @@ class Upgrade extends Base
     /**
      * Checks the repo .git folder.
      */
-    public const CHECK_GIT_FOLDER = false;
+    const CHECK_GIT_FOLDER = false;
 
     /**
      * Upgrade default command.
      */
-    public const DEFAULT_METHOD = 'index';
+    const DEFAULT_METHOD = 'index';
 
     /**
      * Upgrade.
@@ -49,7 +49,7 @@ class Upgrade extends Base
         if (APP_VERSION < $repo->tag_name) {
             $runningFile = \Phar::running(false);
 
-            o('Fething new version ('.$repo->tag_name.') ...', 'green');
+            o('Fetching new version ('.$repo->tag_name.') ...', 'green');
 
             file_put_contents(
                 $runningFile,
