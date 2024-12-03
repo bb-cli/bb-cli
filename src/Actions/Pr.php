@@ -226,10 +226,11 @@ class Pr extends Base
      *
      * @param  string $fromBranch
      * @param  string $toBranch
+     * @param  int    $addDefaultReviewers
      * @return void
      * @throws \Exception
      */
-    public function create($fromBranch, $toBranch = '')
+    public function create($fromBranch, $toBranch = '', $addDefaultReviewers = 1)
     {
         if (empty($toBranch)) {
             $toBranch = $fromBranch;
@@ -248,11 +249,47 @@ class Pr extends Base
                     'name' => $toBranch,
                 ],
             ],
+            'reviewers' => $addDefaultReviewers ? $this->defaultReviewers() : [],
         ]);
 
         o([
             'id' => array_get($response, 'id'),
             'link' => array_get($response, 'links.html.href'),
         ]);
+    }
+
+    /**
+     * Get default reviewers for repository.
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function defaultReviewers()
+    {
+        $currentUserUuid = $this->currentUserUuid();
+        $response = $this->makeRequest('GET', "/default-reviewers");
+
+        // remove current user from reviewers
+        return array_values(array_filter($response['values'] ?? [], function ($reviewer) use ($currentUserUuid) {
+            return $reviewer['uuid'] !== $currentUserUuid;
+        }));
+    }
+
+    /**
+     * Get current user uuid.
+     *
+     * @return string
+     * @throws \Exception
+     */
+    private function currentUserUuid()
+    {
+        $response = $this->makeRequest(
+            'GET',
+            '/user',
+            [],
+            false
+        );
+
+        return array_get($response, 'uuid');
     }
 }
