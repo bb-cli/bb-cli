@@ -44,17 +44,22 @@ class Base
      * @param  string $method
      * @param  string $url
      * @param  array  $payload
+     * @param  bool   $isRepositoryUrl
      * @return mixed
      * @throws \Exception
      * @see    https://developer.atlassian.com/cloud/bitbucket/rest
      */
-    public function makeRequest($method = 'GET', $url = '', $payload = [])
+    public function makeRequest($method = 'GET', $url = '', $payload = [], $isRepositoryUrl = true)
     {
         $this->checkAuth();
 
-        $repoPath = getRepoPath();
+        if ($isRepositoryUrl) {
+            $repoPath = getRepoPath();
+            $url = "/repositories/{$repoPath}{$url}";
+        }
+
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://api.bitbucket.org/2.0/repositories/{$repoPath}{$url}");
+        curl_setopt($ch, CURLOPT_URL, "https://api.bitbucket.org/2.0{$url}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
