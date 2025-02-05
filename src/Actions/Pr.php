@@ -37,7 +37,7 @@ class Pr extends Base
     /**
      * List pull request for repository.
      *
-     * @param  string $destination
+     * @param  string  $destination
      * @return void
      */
     public function list($destination = '')
@@ -45,7 +45,7 @@ class Pr extends Base
         $result = [];
 
         foreach ($this->makeRequest('GET', '/pullrequests?state=OPEN')['values'] as $prInfo) {
-            if (!empty($destination) &&
+            if (! empty($destination) &&
                 array_get($prInfo, 'destination.branch.name') !== $destination
             ) {
                 continue;
@@ -86,7 +86,7 @@ class Pr extends Base
     /**
      * Get pull request diff.
      *
-     * @param  int $prNumber
+     * @param  int  $prNumber
      * @return void
      */
     public function diff($prNumber)
@@ -97,8 +97,9 @@ class Pr extends Base
     /**
      * Diff stats file.
      *
-     * @param  int $prNumber
+     * @param  int  $prNumber
      * @return void
+     *
      * @throws \Exception
      */
     public function files($prNumber)
@@ -113,8 +114,8 @@ class Pr extends Base
     /**
      * Get pull request commits.
      *
-     * @param $prNumber
      * @return void
+     *
      * @throws \Exception
      */
     public function commits($prNumber)
@@ -131,8 +132,9 @@ class Pr extends Base
     /**
      * Approve pull request.
      *
-     * @param  array $prNumbers
+     * @param  array  $prNumbers
      * @return void
+     *
      * @throws \Exception
      */
     public function approve(...$prNumbers)
@@ -163,8 +165,9 @@ class Pr extends Base
     /**
      * Revert pull request to not approved status.
      *
-     * @param  int $prNumber
+     * @param  int  $prNumber
      * @return void
+     *
      * @throws \Exception
      */
     public function unApprove($prNumber)
@@ -175,8 +178,9 @@ class Pr extends Base
     /**
      *  Request changes for pull request
      *
-     * @param  int $prNumber
+     * @param  int  $prNumber
      * @return void
+     *
      * @throws \Exception
      */
     public function requestChanges($prNumber)
@@ -187,8 +191,9 @@ class Pr extends Base
     /**
      * Revert pull request to not request changes status.
      *
-     * @param  int $prNumber
+     * @param  int  $prNumber
      * @return void
+     *
      * @throws \Exception
      */
     public function unRequestChanges($prNumber)
@@ -199,8 +204,9 @@ class Pr extends Base
     /**
      * Decline pull request.
      *
-     * @param  int $prNumber
+     * @param  int  $prNumber
      * @return void
+     *
      * @throws \Exception
      */
     public function decline($prNumber)
@@ -212,8 +218,9 @@ class Pr extends Base
     /**
      * Merge pull request.
      *
-     * @param  int $prNumber
+     * @param  int  $prNumber
      * @return void
+     *
      * @throws \Exception
      */
     public function merge($prNumber)
@@ -224,10 +231,11 @@ class Pr extends Base
     /**
      * Create pull request from "x" to test "y".
      *
-     * @param  string $fromBranch
-     * @param  string $toBranch
-     * @param  int    $addDefaultReviewers
+     * @param  string  $fromBranch
+     * @param  string  $toBranch
+     * @param  int  $addDefaultReviewers
      * @return void
+     *
      * @throws \Exception
      */
     public function create($fromBranch, $toBranch = '', $addDefaultReviewers = 1)
@@ -237,7 +245,13 @@ class Pr extends Base
             $fromBranch = trim(exec('git symbolic-ref --short HEAD'));
         }
 
-        $response = $this->makeRequest('POST', "/pullrequests", [
+        if (strpos($toBranch, ',') !== false) {
+            $this->bulkCreate(explode(',', $toBranch), $fromBranch);
+
+            return;
+        }
+
+        $response = $this->makeRequest('POST', '/pullrequests', [
             'title' => "Merge {$fromBranch} into {$toBranch}",
             'source' => [
                 'branch' => [
@@ -259,15 +273,54 @@ class Pr extends Base
     }
 
     /**
+     * Create pull request from "x" to test "y".
+     *
+     * @param  array  $toBranch
+     * @return void
+     *
+     * @throws \Exception
+     */
+    protected function bulkCreate(array $toBranchs, string $fromBranch)
+    {
+        $responses = [];
+
+        foreach ($toBranchs as $toBranch) {
+            $response = $this->makeRequest('POST', '/pullrequests', [
+                'title' => "Merge {$fromBranch} into {$toBranch}",
+                'source' => [
+                    'branch' => [
+                        'name' => $fromBranch,
+                    ],
+                ],
+                'destination' => [
+                    'branch' => [
+                        'name' => $toBranch,
+                    ],
+                ],
+                'reviewers' => $this->defaultReviewers(),
+            ]);
+            $responses[] = [
+                'id' => array_get($response, 'id'),
+                'link' => array_get($response, 'links.html.href'),
+            ];
+        }
+
+        o([
+            'pullRequests' => $responses,
+        ]);
+    }
+
+    /**
      * Get default reviewers for repository.
      *
      * @return array
+     *
      * @throws \Exception
      */
     private function defaultReviewers()
     {
         $currentUserUuid = $this->currentUserUuid();
-        $response = $this->makeRequest('GET', "/default-reviewers");
+        $response = $this->makeRequest('GET', '/default-reviewers');
 
         // remove current user from reviewers
         return array_values(array_filter($response['values'] ?? [], function ($reviewer) use ($currentUserUuid) {
@@ -279,6 +332,7 @@ class Pr extends Base
      * Get current user uuid.
      *
      * @return string
+     *
      * @throws \Exception
      */
     private function currentUserUuid()
