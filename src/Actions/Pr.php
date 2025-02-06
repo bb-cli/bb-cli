@@ -245,46 +245,24 @@ class Pr extends Base
             $fromBranch = trim(exec('git symbolic-ref --short HEAD'));
         }
 
-        if (strpos($toBranch, ',') !== false) {
-            $this->bulkCreate(explode(',', $toBranch), $fromBranch);
-
-            return;
-        }
-
-        $response = $this->makeRequest('POST', '/pullrequests', [
-            'title' => "Merge {$fromBranch} into {$toBranch}",
-            'source' => [
-                'branch' => [
-                    'name' => $fromBranch,
-                ],
-            ],
-            'destination' => [
-                'branch' => [
-                    'name' => $toBranch,
-                ],
-            ],
-            'reviewers' => $addDefaultReviewers ? $this->defaultReviewers() : [],
-        ]);
-
-        o([
-            'id' => array_get($response, 'id'),
-            'link' => array_get($response, 'links.html.href'),
-        ]);
+        $toBranches = (strpos($toBranch, ',') !== false) ? explode(',', $toBranch) : [$toBranch];
+        $this->bulkCreate($toBranches, $fromBranch, $addDefaultReviewers);
     }
 
     /**
      * Create pull request from "x" to test "y".
      *
      * @param  array  $toBranch
+     * @param  int  $addDefaultReviewers
      * @return void
      *
      * @throws \Exception
      */
-    protected function bulkCreate(array $toBranchs, string $fromBranch)
+    protected function bulkCreate(array $toBranches, string $fromBranch, $addDefaultReviewers = 1)
     {
         $responses = [];
 
-        foreach ($toBranchs as $toBranch) {
+        foreach ($toBranches as $toBranch) {
             $response = $this->makeRequest('POST', '/pullrequests', [
                 'title' => "Merge {$fromBranch} into {$toBranch}",
                 'source' => [
@@ -297,7 +275,7 @@ class Pr extends Base
                         'name' => $toBranch,
                     ],
                 ],
-                'reviewers' => $this->defaultReviewers(),
+                'reviewers' => $addDefaultReviewers ? $this->defaultReviewers() : [],
             ]);
             $responses[] = [
                 'id' => array_get($response, 'id'),
