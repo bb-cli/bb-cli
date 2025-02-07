@@ -37,7 +37,7 @@ class Pr extends Base
     /**
      * List pull request for repository.
      *
-     * @param  string  $destination
+     * @param string $destination
      * @return void
      */
     public function list($destination = '')
@@ -45,7 +45,7 @@ class Pr extends Base
         $result = [];
 
         foreach ($this->makeRequest('GET', '/pullrequests?state=OPEN')['values'] as $prInfo) {
-            if (! empty($destination) &&
+            if (!empty($destination) &&
                 array_get($prInfo, 'destination.branch.name') !== $destination
             ) {
                 continue;
@@ -86,7 +86,7 @@ class Pr extends Base
     /**
      * Get pull request diff.
      *
-     * @param  int  $prNumber
+     * @param int $prNumber
      * @return void
      */
     public function diff($prNumber)
@@ -97,7 +97,7 @@ class Pr extends Base
     /**
      * Diff stats file.
      *
-     * @param  int  $prNumber
+     * @param int $prNumber
      * @return void
      *
      * @throws \Exception
@@ -132,7 +132,7 @@ class Pr extends Base
     /**
      * Approve pull request.
      *
-     * @param  array  $prNumbers
+     * @param array $prNumbers
      * @return void
      *
      * @throws \Exception
@@ -165,7 +165,7 @@ class Pr extends Base
     /**
      * Revert pull request to not approved status.
      *
-     * @param  int  $prNumber
+     * @param int $prNumber
      * @return void
      *
      * @throws \Exception
@@ -178,7 +178,7 @@ class Pr extends Base
     /**
      *  Request changes for pull request
      *
-     * @param  int  $prNumber
+     * @param int $prNumber
      * @return void
      *
      * @throws \Exception
@@ -191,7 +191,7 @@ class Pr extends Base
     /**
      * Revert pull request to not request changes status.
      *
-     * @param  int  $prNumber
+     * @param int $prNumber
      * @return void
      *
      * @throws \Exception
@@ -204,7 +204,7 @@ class Pr extends Base
     /**
      * Decline pull request.
      *
-     * @param  int  $prNumber
+     * @param int $prNumber
      * @return void
      *
      * @throws \Exception
@@ -218,7 +218,7 @@ class Pr extends Base
     /**
      * Merge pull request.
      *
-     * @param  int  $prNumber
+     * @param int $prNumber
      * @return void
      *
      * @throws \Exception
@@ -231,9 +231,9 @@ class Pr extends Base
     /**
      * Create pull request from "x" to test "y".
      *
-     * @param  string  $fromBranch
-     * @param  string  $toBranch
-     * @param  int  $addDefaultReviewers
+     * @param string $fromBranch
+     * @param string $toBranch
+     * @param int $addDefaultReviewers
      * @return void
      *
      * @throws \Exception
@@ -245,22 +245,28 @@ class Pr extends Base
             $fromBranch = trim(exec('git symbolic-ref --short HEAD'));
         }
 
-        $toBranches = (strpos($toBranch, ',') !== false) ? explode(',', $toBranch) : [$toBranch];
-        $this->bulkCreate($toBranches, $fromBranch, $addDefaultReviewers);
+        $this->bulkCreate(
+            explode(',', $toBranch),
+            $fromBranch,
+            $addDefaultReviewers == 1
+        );
     }
 
     /**
      * Create pull request from "x" to test "y".
      *
-     * @param  array  $toBranch
-     * @param  int  $addDefaultReviewers
+     * @param array $toBranches
+     * @param string $fromBranch
+     * @param bool $addDefaultReviewers
      * @return void
      *
      * @throws \Exception
      */
-    protected function bulkCreate(array $toBranches, string $fromBranch, $addDefaultReviewers = 1)
+    private function bulkCreate($toBranches, $fromBranch, $addDefaultReviewers = true)
     {
         $responses = [];
+
+        $defaultReviewers = $addDefaultReviewers ? $this->defaultReviewers() : [];
 
         foreach ($toBranches as $toBranch) {
             $response = $this->makeRequest('POST', '/pullrequests', [
@@ -275,8 +281,9 @@ class Pr extends Base
                         'name' => $toBranch,
                     ],
                 ],
-                'reviewers' => $addDefaultReviewers ? $this->defaultReviewers() : [],
+                'reviewers' => $defaultReviewers,
             ]);
+
             $responses[] = [
                 'id' => array_get($response, 'id'),
                 'link' => array_get($response, 'links.html.href'),
