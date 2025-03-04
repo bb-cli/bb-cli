@@ -67,9 +67,8 @@ if (!function_exists('o')) {
             }
         } else {
             echo $colors[$color].$prefix.$data;
+            echo $end;
         }
-
-        echo $end;
     }
 }
 
