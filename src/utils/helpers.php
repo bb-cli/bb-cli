@@ -146,3 +146,38 @@ if (!function_exists('userConfig')) {
         return array_get($config, $key, $default);
     }
 }
+
+if (!function_exists('format_relative_timestamp')) {
+    /**
+     * Format a timestamp as relative time.
+     *
+     * Returns human-readable relative time for past dates (e.g., "2 hours ago").
+     * Returns absolute date format for future dates (e.g., "Jan 15, 2024").
+     *
+     * @param string $dateString ISO 8601 datetime string
+     * @return string Formatted timestamp
+     */
+    function format_relative_timestamp($dateString)
+    {
+        $date = new \DateTime($dateString);
+        $now = new \DateTime();
+        $diff = $now->diff($date);
+
+        // Handle future timestamps - return absolute date
+        if ($diff->invert === 0) {
+            return $date->format('M d, Y');
+        }
+
+        // Past timestamps - use relative time
+        // Use total days ($diff->days), not day component ($diff->d)
+        if ($diff->days > 7) {
+            return $date->format('M d, Y');
+        } elseif ($diff->days > 0) {
+            return $diff->days . ' day' . ($diff->days > 1 ? 's' : '') . ' ago';
+        } elseif ($diff->h > 0) {
+            return $diff->h . ' hour' . ($diff->h > 1 ? 's' : '') . ' ago';
+        } else {
+            return $diff->i . ' minute' . ($diff->i > 1 ? 's' : '') . ' ago';
+        }
+    }
+}

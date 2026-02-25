@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Add
+- `bb pr show` command for viewing PR comments with inline code comment support
+  Usage: bb pr show <pr_id> [limit] [unresolved]
+
 ---
 
 ## [1.0.2] - 2024-02-21
