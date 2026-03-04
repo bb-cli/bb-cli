@@ -33,6 +33,7 @@ foreach (scandir($actionsFolder) as $file) {
 
 $actions = [
     'pr' => \BBCli\BBCli\Actions\Pr::class,
+    'pr-details' => \BBCli\BBCli\Actions\PrDetails::class,
     'pipeline' => \BBCli\BBCli\Actions\Pipeline::class,
     'branch' => \BBCli\BBCli\Actions\Branch::class,
     'auth' => \BBCli\BBCli\Actions\Auth::class,
@@ -125,7 +126,8 @@ if (in_array($userAction, $staticCommands['autocomplete'])) {
 
 // Check if git folder exists (skip if --project is used)
 if ($actionClass::CHECK_GIT_FOLDER && !$projectUrl) {
-    if (!is_dir(getcwd().'/.git')) {
+    $gitDir = trim((string) exec('git rev-parse --git-dir 2>/dev/null'));
+    if ($gitDir === '') {
         o('ERROR: No git repository found in current directory.', 'red');
         o('Use --project "owner/repo" to work with remote repository.', 'yellow');
         exit(1);

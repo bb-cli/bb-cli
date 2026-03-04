@@ -32,6 +32,7 @@ class Pr extends Base
         'decline' => 'decline',
         'merge' => 'merge, m',
         'create' => 'create',
+        'show' => 'show',
     ];
 
     /**
@@ -330,5 +331,19 @@ class Pr extends Base
         );
 
         return array_get($response, 'uuid');
+    }
+
+    /**
+     * List pull request general and inline comments.
+     *
+     * Delegates to PrDetails action class to keep Pr focused on lifecycle operations.
+     *
+     * @param int $prId
+     * @param bool $unresolved
+     * @return void
+     */
+    public function show($prId = null, $unresolved = false)
+    {
+        (new PrDetails())->show($prId, $unresolved);
     }
 }
