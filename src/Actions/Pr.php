@@ -246,10 +246,15 @@ class Pr extends Base
             $fromBranch = trim(exec('git symbolic-ref --short HEAD'));
         }
 
+        $title = getUserInput('PR title (leave empty for default):');
+        $description = getUserInput('PR description (leave empty to skip):');
+
         $this->bulkCreate(
             explode(',', $toBranch),
             $fromBranch,
-            $addDefaultReviewers == 1
+            $addDefaultReviewers == 1,
+            $title ?: null,
+            $description ?: null
         );
     }
 
@@ -259,19 +264,21 @@ class Pr extends Base
      * @param array $toBranches
      * @param string $fromBranch
      * @param bool $addDefaultReviewers
+     * @param string|null $title
+     * @param string|null $description
      * @return void
      *
      * @throws \Exception
      */
-    private function bulkCreate($toBranches, $fromBranch, $addDefaultReviewers = true)
+    private function bulkCreate($toBranches, $fromBranch, $addDefaultReviewers = true, $title = null, $description = null)
     {
         $responses = [];
 
         $defaultReviewers = $addDefaultReviewers ? $this->defaultReviewers() : [];
 
         foreach ($toBranches as $toBranch) {
-            $response = $this->makeRequest('POST', '/pullrequests', [
-                'title' => "Merge {$fromBranch} into {$toBranch}",
+            $payload = [
+                'title' => $title ?? "Merge {$fromBranch} into {$toBranch}",
                 'source' => [
                     'branch' => [
                         'name' => $fromBranch,
@@ -283,7 +290,13 @@ class Pr extends Base
                     ],
                 ],
                 'reviewers' => $defaultReviewers,
-            ]);
+            ];
+
+            if ($description) {
+                $payload['description'] = $description;
+            }
+
+            $response = $this->makeRequest('POST', '/pullrequests', $payload);
 
             $responses[] = [
                 'id' => array_get($response, 'id'),
