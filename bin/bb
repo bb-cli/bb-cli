@@ -59,13 +59,24 @@ $staticCommands = [
     ],
 ];
 
-// Check for --project argument and extract it
+// Check for --project, --title and --description arguments and extract them
 $projectUrl = null;
+$prTitle = null;
+$prDescription = null;
+$interactive = false;
 $filteredArgv = [];
 for ($i = 0; $i < count($argv); $i++) {
     if ($argv[$i] === '--project' && isset($argv[$i + 1])) {
         $projectUrl = $argv[$i + 1];
         $i++; // Skip the next argument (the URL)
+    } elseif ($argv[$i] === '--title' && isset($argv[$i + 1])) {
+        $prTitle = $argv[$i + 1];
+        $i++;
+    } elseif ($argv[$i] === '--description' && isset($argv[$i + 1])) {
+        $prDescription = $argv[$i + 1];
+        $i++;
+    } elseif ($argv[$i] === '-i' || $argv[$i] === '--interactive') {
+        $interactive = true;
     } else {
         $filteredArgv[] = $argv[$i];
     }
@@ -75,6 +86,17 @@ $argv = $filteredArgv;
 // Set global project URL for use in getRepoPath()
 if ($projectUrl) {
     $GLOBALS['bb_cli_project_url'] = $projectUrl;
+}
+
+// Set global PR title and description for use in Pr::create()
+if ($prTitle) {
+    $GLOBALS['bb_cli_pr_title'] = $prTitle;
+}
+if ($prDescription) {
+    $GLOBALS['bb_cli_pr_description'] = $prDescription;
+}
+if ($interactive) {
+    $GLOBALS['bb_cli_interactive'] = true;
 }
 
 $userBaseAction = $argv[1] ?? null;
@@ -91,7 +113,10 @@ if (is_null($userBaseAction) || in_array($userBaseAction, $staticCommands['help'
     o(array_keys($actions), 'green');
     o('', 'white');
     o('Global options:', 'green');
-    o('  --project <repo>  Work with repository (e.g., --project "owner/repo" or --project "https://bitbucket.org/owner/repo")', 'yellow');
+    o('  --project <repo>         Work with repository (e.g., --project "owner/repo" or --project "https://bitbucket.org/owner/repo")', 'yellow');
+    o('  -i, --interactive         Enable interactive mode (e.g., prompt for PR title and description)', 'yellow');
+    o('  --title <title>           Set PR title (used with pr create)', 'yellow');
+    o('  --description <desc>      Set PR description (used with pr create)', 'yellow');
     exit(0);
 }
 

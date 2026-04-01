@@ -246,15 +246,25 @@ class Pr extends Base
             $fromBranch = trim(exec('git symbolic-ref --short HEAD'));
         }
 
-        $title = getUserInput('PR title (leave empty for default):');
-        $description = getUserInput('PR description (leave empty to skip):');
+        $interactive = !empty($GLOBALS['bb_cli_interactive']);
+        $title = $GLOBALS['bb_cli_pr_title'] ?? null;
+        $description = $GLOBALS['bb_cli_pr_description'] ?? null;
+
+        if ($interactive) {
+            if (!$title) {
+                $title = getUserInput('PR title (leave empty for default):') ?: null;
+            }
+            if (!$description) {
+                $description = getUserInput('PR description (leave empty to skip):') ?: null;
+            }
+        }
 
         $this->bulkCreate(
             explode(',', $toBranch),
             $fromBranch,
             $addDefaultReviewers == 1,
-            $title ?: null,
-            $description ?: null
+            $title,
+            $description
         );
     }
 
