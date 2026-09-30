@@ -225,6 +225,27 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
+     * Makes a directory of no-op `open`/`xdg-open` commands to put first on a
+     * child process's PATH, so `bb browse` doesn't launch a real browser.
+     *
+     * @return string
+     */
+    private function stubBrowserOpeners(): string
+    {
+        $dir = $this->home.'/stub-bin';
+
+        if (!is_dir($dir)) {
+            mkdir($dir);
+            foreach (['open', 'xdg-open'] as $opener) {
+                file_put_contents("{$dir}/{$opener}", "#!/bin/sh\nexit 0\n");
+                chmod("{$dir}/{$opener}", 0755);
+            }
+        }
+
+        return $dir;
+    }
+
+    /**
      * @param  array<string> $command
      * @return array{stdout: string, stderr: string, exitCode: int}
      */
@@ -238,6 +259,7 @@ abstract class TestCase extends BaseTestCase
 
         $env = $_ENV + $_SERVER;
         $env['HOME'] = $this->home;
+        $env['PATH'] = $this->stubBrowserOpeners().PATH_SEPARATOR.($env['PATH'] ?? getenv('PATH'));
         unset($env['argv'], $env['argc']);
         $env = array_filter($env, 'is_scalar');
 
