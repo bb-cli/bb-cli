@@ -162,7 +162,9 @@ abstract class TestCase extends BaseTestCase
      */
     protected function makeTempDir(string $prefix): string
     {
-        $dir = sys_get_temp_dir().'/'.$prefix.'-'.bin2hex(random_bytes(6));
+        // Resolved, as macOS's temp dir sits behind the /var -> /private/var
+        // symlink and paths PHP reports back (phar entries, getcwd()) are real.
+        $dir = realpath(sys_get_temp_dir()).'/'.$prefix.'-'.bin2hex(random_bytes(6));
         mkdir($dir, 0777, true);
         self::$tempDirs[] = $dir;
 
