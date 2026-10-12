@@ -308,4 +308,25 @@ class PrDetailsTest extends ActionTestCase
 
         $this->assertStringContainsString('Ada (2 hours ago):', $output);
     }
+
+    public function testCommentHeadingsShowIdsAndWhatARepliesTo(): void
+    {
+        $twoHoursAgo = (new \DateTime())->modify('-2 hours')->format(\DateTime::ATOM);
+
+        $action = $this->actionRouting(PrDetails::class, [
+            '/comments' => ['values' => [
+                $this->comment('Ada', 'question', $twoHoursAgo, ['id' => 101]),
+                $this->comment('Grace', 'answer', $twoHoursAgo, ['id' => 102, 'parent' => ['id' => 101]]),
+                $this->inlineComment('Alan', 'nit', $twoHoursAgo, ['path' => 'a.php', 'to' => 3], ['id' => 103]),
+            ]],
+        ]);
+
+        $output = $this->captureOutput(function () use ($action) {
+            $action->show(7);
+        });
+
+        $this->assertStringContainsString('Ada (2 hours ago) [#101]:', $output);
+        $this->assertStringContainsString('Grace (2 hours ago) [#102, reply to #101]:', $output);
+        $this->assertStringContainsString('Alan (2 hours ago) [#103]:', $output);
+    }
 }

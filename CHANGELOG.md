@@ -15,6 +15,13 @@ All notable changes to this project will be documented in this file.
   Usage: bb pr create <from> [<to>] --draft
 - `bb pr ready` command for marking a draft pull request ready for review.
   Usage: bb pr ready <pr_id>
+- `bb pr comment` command for commenting on a pull request. The message is
+  the rest of the arguments, or `-` to read it from stdin. `--file` and
+  `--line` comment inline on a line of the new version of a file, and
+  `--reply-to` replies to an existing comment.
+  Usage: bb pr comment <pr_id> <message> [--file <path> --line <n> | --reply-to <comment_id>]
+- `bb pr show` now shows each comment's id, and which comment a reply
+  answers, so they can be passed to `bb pr comment --reply-to`.
 - A PHPUnit test suite covering the helpers, `Base`, every action class, the
   `bin/bb` command line, the curl transport and the phar build, plus a
   `Tests` GitHub Actions workflow running it on PHP 8.2, 8.3, 8.4 and 8.5.

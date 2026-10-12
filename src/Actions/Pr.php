@@ -35,6 +35,7 @@ class Pr extends Base
         'edit' => 'edit, e',
         'ready' => 'ready',
         'show' => 'show',
+        'comment' => 'comment',
     ];
 
     const ACTION_DESCRIPTION = 'Manage pull requests';
@@ -54,6 +55,7 @@ class Pr extends Base
         'edit'             => ['args' => '<pr>',                  'description' => 'Edit title, description, destination, or reviewers of a pull request'],
         'ready'            => ['args' => '<pr>',                  'description' => 'Mark a draft pull request as ready for review'],
         'show'             => ['args' => '[<pr>]',                'description' => 'Show pull request details and comments'],
+        'comment'          => ['args' => '<pr> <message>',        'description' => 'Comment on a pull request (--file/--line for inline, --reply-to <id> to reply, "-" reads stdin)'],
     ];
 
     /**
@@ -633,5 +635,112 @@ class Pr extends Base
     public function show($prId = null, $unresolved = false)
     {
         (new PrDetails())->show($prId, $unresolved);
+    }
+
+    /**
+     * Comment on a pull request.
+     *
+     * The message is every argument after the PR number joined with spaces,
+     * so it needn't be quoted; a lone "-" reads it from stdin instead. The
+     * comment is general unless --file and --line place it inline on a line
+     * of the new version of a file, or --reply-to puts it in the thread of an
+     * existing comment (replies inherit their parent's placement).
+     *
+     * @param int $prNumber
+     * @param string ...$messageParts
+     * @return void
+     *
+     * @throws \Exception
+     */
+    public function comment($prNumber, ...$messageParts)
+    {
+        $message = implode(' ', $messageParts);
+        if ($message === '-') {
+            $message = $this->readStdin();
+        }
+
+        if (trim($message) === '') {
+            throw new \Exception('Comment message required. Usage: bb pr comment <pr> <message>', 1);
+        }
+
+        $payload = array_merge(
+            ['content' => ['raw' => $message]],
+            $this->commentPlacement(
+                $GLOBALS['bb_cli_pr_comment_file'] ?? null,
+                $GLOBALS['bb_cli_pr_comment_line'] ?? null,
+                $GLOBALS['bb_cli_pr_comment_reply_to'] ?? null
+            )
+        );
+
+        $response = $this->makeRequest(
+            'POST',
+            "/pullrequests/{$prNumber}/comments",
+            $payload,
+            true,
+            'adding comment to pull request'
+        );
+
+        o([
+            'id' => array_get($response, 'id'),
+            'link' => array_get($response, 'links.html.href'),
+        ], 'green');
+    }
+
+    /**
+     * Build the inline/parent part of a comment payload from --file, --line
+     * and --reply-to.
+     *
+     * @param string|null $file
+     * @param string|null $line
+     * @param string|null $replyTo
+     * @return array
+     *
+     * @throws \Exception
+     */
+    private function commentPlacement($file, $line, $replyTo)
+    {
+        if (!is_null($replyTo)) {
+            if (!is_null($file) || !is_null($line)) {
+                throw new \Exception('--reply-to can\'t be combined with --file or --line: replies go in their parent\'s thread.', 1);
+            }
+
+            return ['parent' => ['id' => $this->positiveInteger($replyTo, '--reply-to')]];
+        }
+
+        if (is_null($file) && is_null($line)) {
+            return [];
+        }
+
+        if (is_null($file) || is_null($line)) {
+            throw new \Exception('Inline comments need both --file and --line.', 1);
+        }
+
+        return ['inline' => ['path' => $file, 'to' => $this->positiveInteger($line, '--line')]];
+    }
+
+    /**
+     * @param string $value
+     * @param string $flag
+     * @return int
+     *
+     * @throws \Exception
+     */
+    private function positiveInteger($value, $flag)
+    {
+        if (!ctype_digit((string) $value) || (int) $value < 1) {
+            throw new \Exception("{$flag} must be a positive whole number, got \"{$value}\".", 1);
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * Read a comment message piped to stdin.
+     *
+     * @return string
+     */
+    protected function readStdin()
+    {
+        return (string) stream_get_contents(STDIN);
     }
 }

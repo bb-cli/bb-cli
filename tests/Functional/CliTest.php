@@ -62,7 +62,7 @@ class CliTest extends TestCase
     {
         $result = $this->runCli(['--help']);
 
-        foreach (['--project', '--interactive', '--title', '--description', '--destination', '--reviewers', '--draft'] as $flag) {
+        foreach (['--project', '--interactive', '--title', '--description', '--destination', '--reviewers', '--draft', '--file', '--line', '--reply-to'] as $flag) {
             $this->assertStringContainsString($flag, $result['stdout'], "{$flag} should be documented.");
         }
     }
@@ -175,6 +175,9 @@ class CliTest extends TestCase
             '--description', 'ignored here',
             '--destination', 'ignored here',
             '--reviewers', 'ignored here',
+            '--file', 'ignored here',
+            '--line', 'ignored here',
+            '--reply-to', 'ignored here',
         ]);
 
         $this->assertSame(0, $result['exitCode'], 'Global flags must not be passed on as positional arguments.');

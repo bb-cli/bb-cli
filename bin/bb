@@ -59,13 +59,17 @@ $staticCommands = [
     ],
 ];
 
-// Check for --project, --title, --description, --destination, --reviewers and --draft arguments and extract them
+// Check for --project, --title, --description, --destination, --reviewers, --draft,
+// --file, --line and --reply-to arguments and extract them
 $projectUrl = null;
 $prTitle = null;
 $prDescription = null;
 $prDestination = null;
 $prReviewers = null;
 $draft = false;
+$commentFile = null;
+$commentLine = null;
+$commentReplyTo = null;
 $interactive = false;
 $filteredArgv = [];
 for ($i = 0; $i < count($argv); $i++) {
@@ -86,6 +90,15 @@ for ($i = 0; $i < count($argv); $i++) {
         $i++;
     } elseif ($argv[$i] === '--draft') {
         $draft = true;
+    } elseif ($argv[$i] === '--file' && isset($argv[$i + 1])) {
+        $commentFile = $argv[$i + 1];
+        $i++;
+    } elseif ($argv[$i] === '--line' && isset($argv[$i + 1])) {
+        $commentLine = $argv[$i + 1];
+        $i++;
+    } elseif ($argv[$i] === '--reply-to' && isset($argv[$i + 1])) {
+        $commentReplyTo = $argv[$i + 1];
+        $i++;
     } elseif ($argv[$i] === '-i' || $argv[$i] === '--interactive') {
         $interactive = true;
     } else {
@@ -119,6 +132,17 @@ if ($interactive) {
     $GLOBALS['bb_cli_interactive'] = true;
 }
 
+// Set global comment placement for use in Pr::comment()
+if (!is_null($commentFile)) {
+    $GLOBALS['bb_cli_pr_comment_file'] = $commentFile;
+}
+if (!is_null($commentLine)) {
+    $GLOBALS['bb_cli_pr_comment_line'] = $commentLine;
+}
+if (!is_null($commentReplyTo)) {
+    $GLOBALS['bb_cli_pr_comment_reply_to'] = $commentReplyTo;
+}
+
 $userBaseAction = $argv[1] ?? null;
 
 // Print version
@@ -145,6 +169,9 @@ if (is_null($userBaseAction) || in_array($userBaseAction, $staticCommands['help'
     o('  --destination <branch>   Set PR destination branch (used with pr edit)', 'yellow');
     o('  --reviewers <names>      Set PR reviewers, comma-separated usernames or UUIDs (used with pr create, pr edit)', 'yellow');
     o('  --draft                  Create the PR as a draft (used with pr create; see "bb pr ready" to undraft)', 'yellow');
+    o('  --file <path>            Comment inline on this file (used with pr comment, needs --line)', 'yellow');
+    o('  --line <n>               Line in the new version of --file to comment on (used with pr comment)', 'yellow');
+    o('  --reply-to <id>          Reply to a comment, IDs are shown by "bb pr show" (used with pr comment)', 'yellow');
     exit(0);
 }
 

@@ -78,7 +78,7 @@ class PrDetails extends Base
         } else {
             foreach ($comments as $comment) {
                 $formatted = $this->formatGeneralComment($comment);
-                o("{$formatted['author']} ({$formatted['timestamp']}):", 'green');
+                o($this->commentHeading($formatted), 'green');
                 o($formatted['content']);
                 o('');
             }
@@ -92,7 +92,7 @@ class PrDetails extends Base
             foreach ($inlineComments as $comment) {
                 $formatted = $this->formatInlineComment($comment);
                 o("File: {$formatted['file']}:{$formatted['line']}", 'cyan');
-                o("{$formatted['author']} ({$formatted['timestamp']}):", 'green');
+                o($this->commentHeading($formatted), 'green');
                 o($formatted['content']);
                 o('');
             }
@@ -190,6 +190,8 @@ class PrDetails extends Base
             return [
                 'author' => array_get($comment, 'user.display_name', 'Unknown'),
                 'timestamp' => format_relative_timestamp(array_get($comment, 'created_on')),
+                'id' => array_get($comment, 'id'),
+                'parent' => array_get($comment, 'parent.id'),
                 'content' => '[DELETED]',
                 'uuid' => array_get($comment, 'user.uuid'),
             ];
@@ -198,9 +200,33 @@ class PrDetails extends Base
         return [
             'author' => array_get($comment, 'user.display_name'),
             'timestamp' => format_relative_timestamp(array_get($comment, 'created_on')),
+            'id' => array_get($comment, 'id'),
+            'parent' => array_get($comment, 'parent.id'),
             'content' => array_get($comment, 'content.raw', ''),
             'uuid' => array_get($comment, 'user.uuid'),
         ];
+    }
+
+    /**
+     * The "author (when) [#id, reply to #parent]:" line above a comment.
+     * The id is what "bb pr comment --reply-to" takes.
+     *
+     * @param array $formatted
+     * @return string
+     */
+    private function commentHeading($formatted)
+    {
+        $heading = "{$formatted['author']} ({$formatted['timestamp']})";
+
+        if (!empty($formatted['id'])) {
+            $reference = "#{$formatted['id']}";
+            if (!empty($formatted['parent'])) {
+                $reference .= ", reply to #{$formatted['parent']}";
+            }
+            $heading .= " [{$reference}]";
+        }
+
+        return $heading.':';
     }
 
     /**
@@ -221,6 +247,8 @@ class PrDetails extends Base
             return [
                 'author' => array_get($comment, 'user.display_name', 'Unknown'),
                 'timestamp' => format_relative_timestamp(array_get($comment, 'created_on')),
+                'id' => array_get($comment, 'id'),
+                'parent' => array_get($comment, 'parent.id'),
                 'content' => '[DELETED]',
                 'file' => array_get($comment, 'inline.path', ''),
                 'line' => $line,
@@ -230,6 +258,8 @@ class PrDetails extends Base
         return [
             'author' => array_get($comment, 'user.display_name'),
             'timestamp' => format_relative_timestamp(array_get($comment, 'created_on')),
+            'id' => array_get($comment, 'id'),
+            'parent' => array_get($comment, 'parent.id'),
             'content' => array_get($comment, 'content.raw', ''),
             'file' => array_get($comment, 'inline.path', ''),
             'line' => $line,
