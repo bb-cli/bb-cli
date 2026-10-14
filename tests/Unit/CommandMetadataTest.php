@@ -163,7 +163,7 @@ class CommandMetadataTest extends TestCase
             (new Pipeline())->listCommandsForAutocomplete();
         });
 
-        $this->assertSame('custom get latest run wait', $output);
+        $this->assertSame('custom latest list recent run view wait', $output);
     }
 
     public function testAutocompleteForAnActionWithoutCommandsIsEmpty(): void

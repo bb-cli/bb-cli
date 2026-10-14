@@ -60,7 +60,7 @@ $staticCommands = [
 ];
 
 // Check for --project, --title, --description, --destination, --reviewers, --draft,
-// --file, --line and --reply-to arguments and extract them
+// --file, --line, --reply-to, --branch and --limit arguments and extract them
 $projectUrl = null;
 $prTitle = null;
 $prDescription = null;
@@ -70,6 +70,8 @@ $draft = false;
 $commentFile = null;
 $commentLine = null;
 $commentReplyTo = null;
+$pipelineBranch = null;
+$pipelineLimit = null;
 $interactive = false;
 $filteredArgv = [];
 for ($i = 0; $i < count($argv); $i++) {
@@ -98,6 +100,12 @@ for ($i = 0; $i < count($argv); $i++) {
         $i++;
     } elseif ($argv[$i] === '--reply-to' && isset($argv[$i + 1])) {
         $commentReplyTo = $argv[$i + 1];
+        $i++;
+    } elseif ($argv[$i] === '--branch' && isset($argv[$i + 1])) {
+        $pipelineBranch = $argv[$i + 1];
+        $i++;
+    } elseif ($argv[$i] === '--limit' && isset($argv[$i + 1])) {
+        $pipelineLimit = $argv[$i + 1];
         $i++;
     } elseif ($argv[$i] === '-i' || $argv[$i] === '--interactive') {
         $interactive = true;
@@ -130,6 +138,14 @@ if ($draft) {
 }
 if ($interactive) {
     $GLOBALS['bb_cli_interactive'] = true;
+}
+
+// Set global pipeline filters for use in Pipeline::list() and Pipeline::recent()
+if (!is_null($pipelineBranch)) {
+    $GLOBALS['bb_cli_pipeline_branch'] = $pipelineBranch;
+}
+if (!is_null($pipelineLimit)) {
+    $GLOBALS['bb_cli_pipeline_limit'] = $pipelineLimit;
 }
 
 // Set global comment placement for use in Pr::comment()
@@ -172,6 +188,8 @@ if (is_null($userBaseAction) || in_array($userBaseAction, $staticCommands['help'
     o('  --file <path>            Comment inline on this file (used with pr comment, needs --line)', 'yellow');
     o('  --line <n>               Line in the new version of --file to comment on (used with pr comment)', 'yellow');
     o('  --reply-to <id>          Reply to a comment, IDs are shown by "bb pr show" (used with pr comment)', 'yellow');
+    o('  --branch <name>          Branch to read bitbucket-pipelines.yml from, or to filter runs by (used with pipeline list, pipeline recent)', 'yellow');
+    o('  --limit <n>              Number of runs to show, 1-100, default 20 (used with pipeline recent)', 'yellow');
     exit(0);
 }
 

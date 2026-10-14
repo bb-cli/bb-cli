@@ -80,6 +80,8 @@ abstract class TestCase extends BaseTestCase
             'bb_cli_pr_comment_file',
             'bb_cli_pr_comment_line',
             'bb_cli_pr_comment_reply_to',
+            'bb_cli_pipeline_branch',
+            'bb_cli_pipeline_limit',
             'bb_cli_interactive',
             'bb_cli_test_input',
             'bb_cli_test_prompts',

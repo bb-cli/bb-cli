@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Add
+- `bb pipeline list` shows the pipelines defined in the repository's
+  `bitbucket-pipelines.yml` (default, branches, tags, pull-requests and
+  custom), read from the main branch or from `--branch`. It reads only the
+  section and pattern names, and stops with an explanation on YAML it can't
+  read reliably (flow style, aliases, merge keys, tabs).
+  Usage: bb pipeline list [--branch <name>]
+- `bb pipeline recent` lists recent pipeline runs, newest first, optionally
+  filtered with `--branch`; `--limit` sets how many (default 20, max 100).
+  Usage: bb pipeline recent [--branch <name>] [--limit <n>]
+- `bb pipeline view` shows a pipeline run's steps (name, result and duration)
+  as well as its details.
 - `bb pr show` command for viewing PR comments with inline code comment support
   Usage: bb pr show <pr_id> [limit] [unresolved]
 - `--reviewers` is now honoured by `bb pr create`, accepting comma-separated
@@ -37,6 +48,8 @@ All notable changes to this project will be documented in this file.
   from `src/` and `config/`, so nothing outside them is read or shipped.
 
 ### Change
+- `bb pipeline get` is now `bb pipeline view`, in line with `gh`. `get` still
+  works as an alias.
 - `Base::makeRequest()` now performs its HTTP call through a protected
   `executeRequest()` method, and `Upgrade` fetches releases through protected
   `fetchLatestRelease()`/`fetchRemote()` methods, so the network layer can be

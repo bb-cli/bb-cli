@@ -21,7 +21,9 @@ class Pipeline extends Base
      * Pipeline commands.
      */
     const AVAILABLE_COMMANDS = [
-        'get' => 'get',
+        'list' => 'list, ls',
+        'recent' => 'recent',
+        'view' => 'view, get',
         'latest' => 'latest',
         'wait' => 'wait',
         'run' => 'run',
@@ -31,7 +33,9 @@ class Pipeline extends Base
     const ACTION_DESCRIPTION = 'Trigger and monitor pipelines';
 
     const COMMAND_DETAILS = [
-        'get'    => ['args' => '<pipeline>',           'description' => 'Show details of a pipeline'],
+        'list'   => ['args' => '',                     'description' => 'List the pipelines defined in bitbucket-pipelines.yml'],
+        'recent' => ['args' => '',                     'description' => 'List recent pipeline runs'],
+        'view'   => ['args' => '<pipeline>',           'description' => 'Show details and steps of a pipeline run'],
         'latest' => ['args' => '',                     'description' => 'Show the latest pipeline'],
         'wait'   => ['args' => '[<pipeline>]',         'description' => 'Wait for a pipeline to complete'],
         'run'    => ['args' => '<branch>',             'description' => 'Run the default pipeline on a branch'],
@@ -39,13 +43,92 @@ class Pipeline extends Base
     ];
 
     /**
-     * Gets details of given pipeline.
+     * Lists the pipelines defined in the repository's bitbucket-pipelines.yml.
+     *
+     * Read from the repository's main branch unless --branch names another.
+     *
+     * @return void
+     *
+     * @throws \Exception
+     */
+    public function list()
+    {
+        $branch = $GLOBALS['bb_cli_pipeline_branch'] ?? null;
+        if ($branch === null) {
+            $branch = array_get(
+                $this->makeRequest('GET', '', [], true, 'fetching repository'),
+                'mainbranch.name'
+            );
+        }
+
+        $yaml = $this->makeRequest(
+            'GET',
+            '/src/'.rawurlencode($branch).'/bitbucket-pipelines.yml',
+            [],
+            true,
+            'fetching bitbucket-pipelines.yml'
+        );
+
+        if (!is_string($yaml)) {
+            throw new \Exception("Could not read bitbucket-pipelines.yml on '{$branch}'.", 1);
+        }
+
+        foreach (PipelineDefinitions::parse($yaml) as $section => $names) {
+            o($section, 'cyan');
+            foreach ($names as $name) {
+                o("  {$name}", 'yellow');
+            }
+        }
+    }
+
+    /**
+     * Lists recent pipeline runs, newest first.
+     *
+     * --limit sets how many (default 20, at most 100) and --branch filters
+     * them to one branch.
+     *
+     * @return void
+     *
+     * @throws \Exception
+     */
+    public function recent()
+    {
+        $limit = $GLOBALS['bb_cli_pipeline_limit'] ?? '20';
+        if (!ctype_digit((string) $limit) || $limit < 1 || $limit > 100) {
+            throw new \Exception('--limit must be a number between 1 and 100.', 1);
+        }
+
+        $url = "/pipelines/?sort=-created_on&pagelen={$limit}";
+        if (isset($GLOBALS['bb_cli_pipeline_branch'])) {
+            $url .= '&target.branch='.rawurlencode($GLOBALS['bb_cli_pipeline_branch']);
+        }
+
+        $runs = array_get($this->makeRequest('GET', $url, [], true, 'fetching recent pipelines'), 'values', []);
+
+        if (!$runs) {
+            o('No pipelines found.', 'yellow');
+            return;
+        }
+
+        foreach ($runs as $run) {
+            o(implode('  ', [
+                '#'.array_get($run, 'build_number'),
+                $this->outcome($run),
+                array_get($run, 'target.ref_name'),
+                array_get($run, 'creator.display_name'),
+                format_relative_timestamp(array_get($run, 'created_on')),
+            ]), 'yellow');
+        }
+    }
+
+    /**
+     * Gets details of given pipeline, with its steps.
      *
      * @param  int  $pipeLineNumber
-     * @param  bool $return
+     * @param  bool $return Return the raw response instead of printing.
      * @return void
      */
-    public function get($pipeLineNumber, $return = false)
+    public function view($pipeLineNumber, $return = false)
     {
         $response = $this->makeRequest('GET', "/pipelines/{$pipeLineNumber}", [], true, 'fetching pipeline');
 
@@ -68,6 +151,8 @@ class Pipeline extends Base
             ],
             'yellow'
         );
+
+        $this->printSteps($pipeLineNumber);
     }
 
     /**
@@ -83,11 +168,11 @@ class Pipeline extends Base
             o('Pipeline: '. $pipeLineNumber, 'yellow');
         }
 
-        $response = $this->get($pipeLineNumber, true);
+        $response = $this->view($pipeLineNumber, true);
 
         if (array_get($response, 'state.name') === 'COMPLETED') {
             o('');
-            $this->get($pipeLineNumber, false);
+            $this->view($pipeLineNumber, false);
             return;
         }
 
@@ -102,7 +187,7 @@ class Pipeline extends Base
      */
     public function latest()
     {
-        return $this->get($this->getLatestPipelineId());
+        return $this->view($this->getLatestPipelineId());
     }
 
     /**
@@ -147,6 +232,44 @@ class Pipeline extends Base
             ],
             'yellow'
         );
+    }
+
+    /**
+     * Prints a pipeline's steps, if it has any.
+     */
+    private function printSteps($pipeLineNumber)
+    {
+        $steps = array_get(
+            $this->makeRequest('GET', "/pipelines/{$pipeLineNumber}/steps/", [], true, 'fetching pipeline steps'),
+            'values',
+            []
+        );
+
+        if (!$steps) {
+            return;
+        }
+
+        o('Steps:', 'cyan');
+        foreach ($steps as $step) {
+            $line = '  '.array_get($step, 'name').': '.$this->outcome($step);
+            $seconds = array_get($step, 'duration_in_seconds');
+            if ($seconds !== null) {
+                $line .= ' ('.($seconds >= 60 ? intdiv($seconds, 60).'m '.($seconds % 60).'s' : $seconds.'s').')';
+            }
+            o($line, 'yellow');
+        }
+    }
+
+    /**
+     * The result of a finished run or step, otherwise its state.
+     */
+    private function outcome($item)
+    {
+        if (array_get($item, 'state.name') === 'COMPLETED') {
+            return array_get($item, 'state.result.name', 'COMPLETED');
+        }
+
+        return array_get($item, 'state.name');
     }
 
     /**
