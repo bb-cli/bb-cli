@@ -29,6 +29,42 @@ class PrDetailsTest extends ActionTestCase
         );
     }
 
+    /**
+     * Routes comment requests as given and answers the summary request
+     * (GET /pullrequests/{id}) with $pullRequest.
+     *
+     * @param array<string, mixed> $responses
+     * @param array<string, mixed> $pullRequest
+     */
+    private function routing(array $responses, array &$recorded = [], array $pullRequest = [])
+    {
+        return $this->actionRouting(PrDetails::class, $responses + [
+            '/pullrequests/' => array_replace_recursive([
+                'id' => 7,
+                'title' => 'Add the thing',
+                'state' => 'OPEN',
+                'draft' => false,
+                'author' => ['display_name' => 'Ada Lovelace', 'nickname' => 'ada'],
+                'source' => ['branch' => ['name' => 'feature/thing']],
+                'destination' => ['branch' => ['name' => 'main']],
+                'links' => ['html' => ['href' => 'https://bitbucket.org/acme/repo/pull-requests/7']],
+                'description' => '',
+                'reviewers' => [],
+                'participants' => [],
+            ], $pullRequest),
+        ], $recorded);
+    }
+
+    private function showSummary(array $pullRequest): array
+    {
+        $recorded = [];
+        $action = $this->routing(['/comments' => ['values' => []]], $recorded, $pullRequest);
+
+        return $this->lines($this->captureOutput(function () use ($action) {
+            $action->show(7);
+        }));
+    }
+
     public function testShowRequiresAPullRequestId(): void
     {
         $this->expectException(\Exception::class);
@@ -40,7 +76,7 @@ class PrDetailsTest extends ActionTestCase
     #[DataProvider('unresolvedFlagProvider')]
     public function testAcceptsBooleanishUnresolvedArguments($flag, bool $expectFiltered): void
     {
-        $action = $this->actionRouting(PrDetails::class, [
+        $action = $this->routing([
             '/comments' => [
                 'values' => [
                     $this->inlineComment('Ada', 'open', '2024-01-01T00:00:00Z', ['path' => 'a.php', 'to' => 1]),
@@ -82,7 +118,7 @@ class PrDetailsTest extends ActionTestCase
 
     public function testSeparatesGeneralAndInlineComments(): void
     {
-        $action = $this->actionRouting(PrDetails::class, [
+        $action = $this->routing([
             '/comments' => [
                 'values' => [
                     $this->comment('Ada', 'Looks good', '2024-01-02T00:00:00Z'),
@@ -100,7 +136,7 @@ class PrDetailsTest extends ActionTestCase
 
         $lines = $this->lines($output);
 
-        $this->assertSame('## Pull Request Comments (PR #7)', $lines[0]);
+        $this->assertContains('## Pull Request Comments (PR #7)', $lines);
         $this->assertContains('### General Comments', $lines);
         $this->assertContains('### Inline Code Comments', $lines);
         $this->assertContains('Looks good', $lines);
@@ -110,7 +146,7 @@ class PrDetailsTest extends ActionTestCase
 
     public function testReportsWhenThereAreNoComments(): void
     {
-        $action = $this->actionRouting(PrDetails::class, ['/comments' => ['values' => []]]);
+        $action = $this->routing(['/comments' => ['values' => []]]);
 
         $output = $this->captureOutput(function () use ($action) {
             $action->show(7);
@@ -122,7 +158,7 @@ class PrDetailsTest extends ActionTestCase
 
     public function testSortsCommentsChronologically(): void
     {
-        $action = $this->actionRouting(PrDetails::class, [
+        $action = $this->routing([
             '/comments' => [
                 'values' => [
                     $this->comment('Ada', 'third', '2024-01-03T00:00:00Z'),
@@ -143,7 +179,7 @@ class PrDetailsTest extends ActionTestCase
     public function testFollowsCommentPaginationAndRequestsTheMaximumPageLength(): void
     {
         $recorded = [];
-        $action = $this->actionRouting(PrDetails::class, [
+        $action = $this->routing([
             'page=1' => [
                 'values' => [$this->comment('Ada', 'page one', '2024-01-01T00:00:00Z')],
                 'next' => 'https://api.bitbucket.org/next',
@@ -157,16 +193,20 @@ class PrDetailsTest extends ActionTestCase
             $action->show(7);
         });
 
-        $this->assertCount(2, $recorded);
-        $this->assertSame('/pullrequests/7/comments?pagelen=100&page=1', $recorded[0]['url']);
-        $this->assertSame('fetching pull request comments', $recorded[0]['label']);
+        $comments = array_values(array_filter($recorded, function ($request) {
+            return strpos($request['url'], '/comments') !== false;
+        }));
+
+        $this->assertCount(2, $comments);
+        $this->assertSame('/pullrequests/7/comments?pagelen=100&page=1', $comments[0]['url']);
+        $this->assertSame('fetching pull request comments', $comments[0]['label']);
         $this->assertStringContainsString('page one', $output);
         $this->assertStringContainsString('page two', $output);
     }
 
     public function testUnresolvedFilterNeverHidesGeneralComments(): void
     {
-        $action = $this->actionRouting(PrDetails::class, [
+        $action = $this->routing([
             '/comments' => [
                 'values' => [
                     // General comments carry no resolution key and are never resolvable.
@@ -257,7 +297,7 @@ class PrDetailsTest extends ActionTestCase
 
     public function testCommentsWithAnEmptyInlinePathCountAsGeneral(): void
     {
-        $action = $this->actionRouting(PrDetails::class, [
+        $action = $this->routing([
             '/comments' => [
                 'values' => [
                     ['user' => ['display_name' => 'Ada'], 'content' => ['raw' => 'no path'],
@@ -276,7 +316,7 @@ class PrDetailsTest extends ActionTestCase
 
     public function testHandlesAResponseWithNoValuesKey(): void
     {
-        $action = $this->actionRouting(PrDetails::class, ['/comments' => []]);
+        $action = $this->routing(['/comments' => []]);
 
         $output = $this->captureOutput(function () use ($action) {
             $action->show(7);
@@ -298,7 +338,7 @@ class PrDetailsTest extends ActionTestCase
     {
         $twoHoursAgo = (new \DateTime())->modify('-2 hours')->format(\DateTime::ATOM);
 
-        $action = $this->actionRouting(PrDetails::class, [
+        $action = $this->routing([
             '/comments' => ['values' => [$this->comment('Ada', 'recent', $twoHoursAgo)]],
         ]);
 
@@ -313,7 +353,7 @@ class PrDetailsTest extends ActionTestCase
     {
         $twoHoursAgo = (new \DateTime())->modify('-2 hours')->format(\DateTime::ATOM);
 
-        $action = $this->actionRouting(PrDetails::class, [
+        $action = $this->routing([
             '/comments' => ['values' => [
                 $this->comment('Ada', 'question', $twoHoursAgo, ['id' => 101]),
                 $this->comment('Grace', 'answer', $twoHoursAgo, ['id' => 102, 'parent' => ['id' => 101]]),
@@ -328,5 +368,69 @@ class PrDetailsTest extends ActionTestCase
         $this->assertStringContainsString('Ada (2 hours ago) [#101]:', $output);
         $this->assertStringContainsString('Grace (2 hours ago) [#102, reply to #101]:', $output);
         $this->assertStringContainsString('Alan (2 hours ago) [#103]:', $output);
+    }
+
+    public function testShowsThePullRequestSummaryBeforeTheComments(): void
+    {
+        $recorded = [];
+        $action = $this->routing(['/comments' => ['values' => [$this->comment('Ada', 'hi', '2024-01-01T00:00:00Z')]]], $recorded, [
+            'description' => "Does the thing.\nSecond line.",
+        ]);
+
+        $output = $this->captureOutput(function () use ($action) {
+            $action->show(7);
+        });
+        $lines = $this->lines($output);
+
+        $this->assertSame('## PR #7: Add the thing', $lines[0]);
+        $this->assertContains('OPEN | Ada Lovelace | feature/thing -> main', $lines);
+        $this->assertContains('https://bitbucket.org/acme/repo/pull-requests/7', $lines);
+        $this->assertContains('Does the thing.', $lines);
+        $this->assertContains('Second line.', $lines);
+        $this->assertLessThan(strpos($output, 'Pull Request Comments'), strpos($output, 'Add the thing'));
+        $this->assertSame('/pullrequests/7', $recorded[0]['url']);
+        $this->assertSame('fetching pull request details', $recorded[0]['label']);
+    }
+
+    public function testSummaryOmitsTheDescriptionWhenThereIsNone(): void
+    {
+        $lines = $this->showSummary(['description' => '   ']);
+
+        $this->assertNotContains('Description:', $lines);
+    }
+
+    public function testSummaryFlagsDraftPullRequests(): void
+    {
+        $lines = $this->showSummary(['draft' => true]);
+
+        $this->assertContains('OPEN (draft) | Ada Lovelace | feature/thing -> main', $lines);
+    }
+
+    public function testSummaryListsReviewersWithTheirApprovalState(): void
+    {
+        $ada = ['display_name' => 'Ada', 'uuid' => '{ada}'];
+        $grace = ['display_name' => 'Grace', 'uuid' => '{grace}'];
+        $alan = ['display_name' => 'Alan', 'uuid' => '{alan}'];
+
+        $lines = $this->showSummary([
+            'reviewers' => [$ada, $grace, $alan],
+            'participants' => [
+                ['user' => $ada, 'role' => 'REVIEWER', 'approved' => true, 'state' => 'approved'],
+                ['user' => $grace, 'role' => 'REVIEWER', 'approved' => false, 'state' => 'changes_requested'],
+                ['user' => $alan, 'role' => 'REVIEWER', 'approved' => false, 'state' => null],
+                ['user' => ['display_name' => 'Zed', 'uuid' => '{zed}'], 'role' => 'PARTICIPANT', 'approved' => false, 'state' => null],
+            ],
+        ]);
+
+        $this->assertContains('Reviewers: Ada (approved), Grace (changes requested), Alan (no response)', $lines);
+    }
+
+    public function testSummaryOmitsReviewersWhenThereAreNone(): void
+    {
+        $lines = $this->showSummary([]);
+
+        foreach ($lines as $line) {
+            $this->assertStringStartsNotWith('Reviewers:', $line);
+        }
     }
 }

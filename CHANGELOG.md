@@ -17,7 +17,10 @@ All notable changes to this project will be documented in this file.
 - `bb pipeline view` shows a pipeline run's steps (name, result and duration)
   as well as its details.
 - `bb pr show` command for viewing PR comments with inline code comment support
-  Usage: bb pr show <pr_id> [limit] [unresolved]
+  Usage: bb pr show <pr_id> [unresolved]
+- `bb pr show` now starts with a summary of the pull request: title, state
+  (flagging drafts), author, branches, link, reviewers with their approval
+  state, and the description.
 - `--reviewers` is now honoured by `bb pr create`, accepting comma-separated
   nicknames and/or UUIDs. When it is omitted, the PR still falls back to the
   repository's default reviewers.

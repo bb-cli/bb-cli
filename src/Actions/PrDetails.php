@@ -52,7 +52,75 @@ class PrDetails extends Base
             throw new \Exception('Invalid unresolved value. Usage: bb pr show <pr_id> [unresolved]');
         }
 
+        $this->displaySummary($prId);
         $this->displayComments($prId, $unresolved);
+    }
+
+    /**
+     * Display the pull request's title, branches, reviewers and description.
+     *
+     * @param int $prId
+     * @return void
+     */
+    private function displaySummary($prId)
+    {
+        $pr = $this->makeRequest('GET', "/pullrequests/{$prId}", [], true, 'fetching pull request details');
+
+        $state = array_get($pr, 'state', 'UNKNOWN').(array_get($pr, 'draft') ? ' (draft)' : '');
+
+        o("## PR #{$prId}: ".array_get($pr, 'title', ''), 'green');
+        o(sprintf(
+            '%s | %s | %s -> %s',
+            $state,
+            array_get($pr, 'author.display_name', 'Unknown'),
+            array_get($pr, 'source.branch.name', '?'),
+            array_get($pr, 'destination.branch.name', '?')
+        ), 'cyan');
+
+        if (!empty(array_get($pr, 'links.html.href'))) {
+            o(array_get($pr, 'links.html.href'), 'cyan');
+        }
+
+        $reviewers = $this->formatReviewers($pr);
+        if ($reviewers !== '') {
+            o("Reviewers: {$reviewers}", 'yellow');
+        }
+
+        $description = trim((string) array_get($pr, 'description', ''));
+        if ($description !== '') {
+            o('');
+            o($description);
+        }
+
+        o('');
+    }
+
+    /**
+     * "Name (state)" for each reviewer, using the state from the participants list.
+     *
+     * @param array $pr
+     * @return string
+     */
+    private function formatReviewers($pr)
+    {
+        $states = [];
+        foreach (array_get($pr, 'participants', []) as $participant) {
+            $state = array_get($participant, 'state');
+            if (empty($state) && !empty($participant['approved'])) {
+                $state = 'approved';
+            }
+            $states[array_get($participant, 'user.uuid')] = $state;
+        }
+
+        return implode(', ', array_map(function ($reviewer) use ($states) {
+            $state = $states[array_get($reviewer, 'uuid')] ?? null;
+
+            return sprintf(
+                '%s (%s)',
+                array_get($reviewer, 'display_name', 'Unknown'),
+                empty($state) ? 'no response' : str_replace('_', ' ', $state)
+            );
+        }, array_get($pr, 'reviewers', [])));
     }
 
     /**
